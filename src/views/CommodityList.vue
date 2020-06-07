@@ -90,13 +90,7 @@
       </template>
     </van-tree-select>
 
-    <van-submit-bar
-      :price="_price"
-      @submit="_onSubmit"
-      button-text="加入购物车"
-      tip="选择的商品将会您的加入购物车"
-      tip-icon="info-o"
-    />
+    <van-submit-bar :price="_price" @submit="_onSubmit" button-text="确认选择" tip="选择的商品将会您的加入购物车" tip-icon="info-o" />
   </div>
 </template>
 
@@ -239,29 +233,25 @@ export default {
     },
     _changeNum(type, operation) {
       let num = 0
-      this.cart.forEach(item => {
-        if (item.type === type) {
-          if (operation === 0) {
-            num += item.num
-          } else {
-            num -= item.num
-          }
-        }
-      })
+      if (operation == 1) {
+        num = -1
+      } else {
+        num = 1
+      }
       if (type === 1) {
-        this.items[1].badge = num
+        this.items[1].badge += num
       } else if (type === 2) {
-        this.items[0].badge = num
+        this.items[0].badge += num
       } else if (type === 3) {
-        this.items[3].badge = num
+        this.items[3].badge += num
       } else if (type === 4) {
-        this.items[2].badge = num
+        this.items[2].badge += num
       }
     },
     _onSubmit() {
       this.addOrder({ list: this.cart, s_id: this.$route.params.flag, store_id: this.$route.params.id }).then(() => {
         this.$toast.success({
-          message: '加入购物车成功',
+          message: '操作成功',
           duration: 800,
           onClose: () => {
             this.$router.replace({ path: `/order/${this.$route.params.id}/${this.$route.params.flag}` })

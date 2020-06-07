@@ -37,7 +37,7 @@ module.exports = {
       },
     },
   },
-  publicPath: './',
+  publicPath: process.env.NODE_ENV === 'production' ? '/neworder/' : '/',
   configureWebpack: {
     externals: {
       vue: 'Vue',

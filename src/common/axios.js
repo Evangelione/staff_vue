@@ -47,25 +47,30 @@ axios.interceptors.response.use(
       }
       // 是否为登录验证过期
       if (config.data.errorCode == errorcode.NOTICKET || config.data.errorCode == errorcode.TIMEOUT) {
-        if (window.location.hash != '#/login') {
+        let route = router.app._route
+        if (route.name != 'Login') {
           Toast({
             message: '请重新登录',
             icon: 'warn-o',
             forbidClick: true,
             duration: 1500,
             onClose: () => {
-              // localStorage.removeItem('ticket')
-              if (window.location.hash.indexOf('order') > -1) {
-                router.replace(`/login/${window.location.hash.substr(12)}`)
-              } else if (window.location.hash.indexOf('staffOrder') > -1) {
+              localStorage.removeItem('ticket')
+              if (route.path.indexOf('order') > -1) {
+                router.push({ name: 'Login', params: router.app._route.params })
+              } else if (route.path.indexOf('staffOrder') > -1) {
                 window.location.href = 'http://www.9youke.com/packapp/storestaff/login.html'
               } else {
-                router.replace(`/login/${window.location.hash.substr(8)}`)
+                router.push({ name: 'Login', params: router.app._route.params })
               }
             },
           })
-          return false
         }
+        return false
+      }
+      if (config.data.errorCode == errorcode.WX) {
+        window.location.href = config.data.result.referer
+        return false
       }
       // 是否非法操作
       if (!config.data.errorCode) {

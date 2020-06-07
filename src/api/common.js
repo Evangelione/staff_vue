@@ -10,6 +10,17 @@ export default {
     axios.post('/wap.php?g=Wap&c=Login&a=login_scan', {
       ...payload,
     }),
+  // 获取短信验证码
+  getSms: payload =>
+    axios.post('/wap.php?g=Wap&c=Login&a=SmsCodeverify', {
+      ...payload,
+      source: 'scan',
+    }),
+  // 注册
+  registerAcc: payload =>
+    axios.post('/wap.php?g=Wap&c=Login&a=verifyReg ', {
+      ...payload,
+    }),
   // 获取闲置标识
   getFlag: payload =>
     axios.post('/wap.php?g=wap&c=ScanOrder&a=getFreeStation', {
@@ -42,7 +53,7 @@ export default {
     }),
   // 根据订单id获取标识
   bindFlag: payload =>
-    axios.post('/wap.php?g=Wap&c=ScanOrder&a=...', {
+    axios.post('/wap.php?g=Wap&c=ScanOrder&a=scanImaxOrder', {
       ...payload,
       ticket: localStorage.getItem('ticket'),
     }),

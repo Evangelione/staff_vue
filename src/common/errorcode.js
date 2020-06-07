@@ -4,4 +4,5 @@ export default {
   NOTICKET: '20044013',
   TIMEOUT: '20000009',
   OCCUPIED: '20000005',
+  WX: '20044333',
 }

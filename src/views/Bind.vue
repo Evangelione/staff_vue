@@ -26,9 +26,10 @@ export default {
   created() {},
 
   mounted() {
-    // this.bindFlag().then(res => {
-    //   console.log(res)
-    // })
+    let staff = this.$route.params.staff ? this.$route.params.staff : 0
+    this.bindFlag({ order_no: this.$route.params.order, staff_id: staff }).then(res => {
+      this.$router.replace({ path: `/order/${res.store_id}/${res.s_id}` })
+    })
   },
 
   destroyed() {},

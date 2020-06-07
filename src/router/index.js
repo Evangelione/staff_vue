@@ -4,6 +4,11 @@ import VueRouter from 'vue-router'
 Vue.use(VueRouter)
 
 const routes = [
+  // {
+  //   path: '/',
+  //   name: 'Index',
+  //   component: () => import(/* webpackChunkName: "index" */ '../views/Index.vue'),
+  // },
   {
     path: '/login/:id/:flag',
     name: 'Login',
@@ -15,7 +20,7 @@ const routes = [
     component: () => import(/* webpackChunkName: "order" */ '../views/Order.vue'),
   },
   {
-    path: '/bind/:order',
+    path: '/bind/:order/:staff?',
     name: 'Bind',
     component: () => import(/* webpackChunkName: "bind" */ '../views/Bind.vue'),
   },
@@ -47,6 +52,8 @@ const routes = [
 ]
 
 const router = new VueRouter({
+  base: '/neworder/',
+  mode: 'history',
   routes,
 })
 

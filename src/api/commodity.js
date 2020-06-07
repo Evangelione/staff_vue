@@ -26,9 +26,10 @@ export default {
       ticket: localStorage.getItem('ticket'),
     }),
   // 加入购物车
-  addOrder: payload =>
-    axios.post('/wap.php?g=Wap&c=ScanOrder&a=placeOrder', {
+  addOrder: payload => {
+    return axios.post('/wap.php?g=Wap&c=ScanOrder&a=placeOrder', {
       ...payload,
       ticket: localStorage.getItem('ticket'),
-    }),
+    })
+  },
 }

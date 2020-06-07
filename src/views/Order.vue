@@ -44,35 +44,36 @@
           <van-tag :type="_tagType(item.type)" style="margin-top: 3px;">{{ _goodsType(item.type) }}</van-tag>
         </template>
         <template #footer>
-          <span v-if="item.need_service_personnel === '1' && item.remark_service_personnel !== '0' && item.type !== '4'"
-            >当前指定：{{ _staffName(item.remark_service_personnel) }}</span
-          >
+          <span
+            style="padding: 4px 0;"
+            v-if="item.need_service_personnel === '1' && item.remark_service_personnel !== '0' && item.type !== '4'"
+          >指定：{{ _getStaffInfo(item) }}</span>
           <van-button
             @click="_controlStaffPicker(index, item)"
             size="small"
             style="margin-top: 20px"
             v-if="item.type != '2' && item.status == '0' && item.need_service_personnel === '1'"
-            >指定服务人员</van-button
-          >
+          >指定服务人员</van-button>
 
           <van-collapse v-if="item.type === '4'" v-model="activeNames">
             <van-collapse-item :name="item.id" title="套餐包含内容">
-              <div
-                :key="index2"
-                style="margin-top: 3px;display: flex;justify-content: space-between;"
-                v-for="(i, index2) in item.detail"
-              >
-                <span>{{ i.name }} x1</span>
-                <span v-if="i.need_service_personnel === '1' && i.remark_service_personnel !== '0'"
-                  >当前指定：{{ _staffName(i.remark_service_personnel) }}</span
-                >
-                <van-button
-                  @click="_controlPackageStaffPicker(index, index2, i)"
-                  size="mini"
-                  style="margin-left: 40px;padding: 0 4px;"
-                  v-if="i.type != '2' && i.status == '0' && i.need_service_personnel === '1'"
-                  >指定服务人员</van-button
-                >
+              <div :key="index2" style="margin-top: 3px;" v-for="(i, index2) in item.detail">
+                <div style="display: flex;justify-content: space-between; align-items: center;">
+                  <span>{{ i.name }} x1</span>
+
+                  <van-button
+                    @click="_controlPackageStaffPicker(index, index2, i)"
+                    size="mini"
+                    style="margin-left: 40px;padding: 0 4px;"
+                    v-if="i.type != '2' && i.status == '0' && i.need_service_personnel === '1'"
+                  >指定服务人员</van-button>
+                </div>
+                <div style="text-align: left;">
+                  <span
+                    class="package-staff"
+                    v-if="i.need_service_personnel === '1' && i.remark_service_personnel !== '0'"
+                  >指定：{{ _getStaffInfo(i) }}</span>
+                </div>
               </div>
             </van-collapse-item>
           </van-collapse>
@@ -124,7 +125,7 @@
         @confirm="_pickStaff"
         show-toolbar
         title="选择店员"
-        value-key="name"
+        value-key="t_name"
       ></van-picker>
     </van-popup>
     <van-popup position="bottom" safe-area-inset-bottom v-model="showPackageStaffPicker">
@@ -134,7 +135,7 @@
         @confirm="_pickPackageStaff"
         show-toolbar
         title="选择店员"
-        value-key="name"
+        value-key="t_name"
       ></van-picker>
     </van-popup>
 
@@ -189,6 +190,25 @@ export default {
       let total = 0
       this.list.forEach(item => {
         total += item.unit_price * 100 * item.goods_num
+        if (
+          item.type == '1' &&
+          item.need_service_personnel == '1' &&
+          item.remark_service_personnel != '0' &&
+          item.remark_service_personnel_price
+        ) {
+          total += item.remark_service_personnel_price * 100
+        } else if (item.type == '4') {
+          item.detail.forEach(i => {
+            if (
+              i.type == '1' &&
+              i.need_service_personnel == '1' &&
+              i.remark_service_personnel != '0' &&
+              i.remark_service_personnel_price
+            ) {
+              total += i.remark_service_personnel_price * 100
+            }
+          })
+        }
       })
       return total
     },
@@ -215,7 +235,18 @@ export default {
     },
     _orderSubmitText() {
       if (this.list.length > 0) {
-        return this.list[0].status === '2' ? '结算中' : '提交订单'
+        let str = '结算'
+        if (this.list[0].status == '2') {
+          str = '结算中'
+        } else {
+          for (let i = 0; i < this.list.length; i++) {
+            if (this.list[i].status == '0') {
+              str = '提交订单'
+              break
+            }
+          }
+        }
+        return str
       } else {
         return '提交订单'
       }
@@ -228,8 +259,8 @@ export default {
 
   mounted() {
     const ticket = localStorage.getItem('ticket')
-    if (!ticket) {
-      this.$router.replace({ path: `/login/${this.$route.params.id}/${this.$route.params.flag}` })
+    if (!ticket && !this._isWx) {
+      // this.$router.replace({ path: `/login/${this.$route.params.id}/${this.$route.params.flag}` })
     } else {
       this._getUserOrder()
     }
@@ -248,11 +279,30 @@ export default {
       this.getUserOrder({ s_id: this.$route.params.flag }).then(res => {
         this.loading = false
         this.list = res
-        this._getRecommendList()
+
+        let goodsSet = new Set()
+        let serviceSet = new Set()
+
+        res.forEach(item => {
+          if (item.type === '1') {
+            serviceSet.add(item.goods_appoint_id)
+          } else if (item.type === '2') {
+            goodsSet.add(item.goods_appoint_id)
+          } else if (item.type === '4') {
+            item.detail.forEach(item2 => {
+              if (item2.type === '1') {
+                serviceSet.add(item2.goods_appoint_id)
+              } else if (item2.type === '2') {
+                goodsSet.add(item2.goods_appoint_id)
+              }
+            })
+          }
+        })
+        this._getRecommendList(Array.from(goodsSet), Array.from(serviceSet))
       })
     },
-    _getRecommendList() {
-      this.getRecommendList({ order_id: this.list[0].order_id }).then(res => {
+    _getRecommendList(goods, services) {
+      this.getRecommendList({ goods_ids: goods, service_ids: services, store_id: this.$route.params.id }).then(res => {
         let r = [...res.goods, ...res.service]
         let total = r.length
         let result = []
@@ -308,14 +358,6 @@ export default {
       }
       return name
     },
-    _staffName(id) {
-      let staff = this.staffColumns.find(item => {
-        if (item.id === id) {
-          return item
-        }
-      })
-      return staff && staff.name
-    },
     _openFlagPicker() {
       if (this.flagColumns.length !== 0) {
         this.showFlagPicker = !this.showFlagPicker
@@ -331,12 +373,12 @@ export default {
             if (item.status !== 0) {
               return {
                 ...item,
-                name: item.name + ` - ${item.technician_grade_name || '暂无等级'} （¥${item.service_fee}）（服务中）`,
+                t_name: item.name + ` - ${item.technician_grade_name || '暂无等级'} （¥${item.service_fee}）（服务中）`,
               }
             } else {
               return {
                 ...item,
-                name: item.name + ` - ${item.technician_grade_name || '暂无等级'} （¥ ${item.service_fee}）`,
+                t_name: item.name + ` - ${item.technician_grade_name || '暂无等级'} （¥ ${item.service_fee}）`,
               }
             }
           })
@@ -352,12 +394,12 @@ export default {
             if (item.status !== 0) {
               return {
                 ...item,
-                name: item.name + ` - ${item.technician_grade_name || '暂无等级'} （¥${item.service_fee}）（服务中）`,
+                t_name: item.name + ` - ${item.technician_grade_name || '暂无等级'} （¥${item.service_fee}）（服务中）`,
               }
             } else {
               return {
                 ...item,
-                name: item.name + ` - ${item.technician_grade_name || '暂无等级'} （¥ ${item.service_fee}）`,
+                t_name: item.name + ` - ${item.technician_grade_name || '暂无等级'} （¥ ${item.service_fee}）`,
               }
             }
           })
@@ -374,10 +416,18 @@ export default {
     },
     _pickStaff(data) {
       this.list[this.curGood].remark_service_personnel = data.id
+      this.list[this.curGood].remark_service_personnel_name = data.name
+      this.list[this.curGood].remark_service_personnel_level = data.technician_grade_name
+      this.list[this.curGood].remark_service_personnel_price = data.service_fee
+      this.list = Object.assign([], this.list)
       this._controlStaffPicker()
     },
     _pickPackageStaff(data) {
       this.list[this.curGood].detail[this.curPackageGood].remark_service_personnel = data.id
+      this.list[this.curGood].detail[this.curPackageGood].remark_service_personnel_name = data.name
+      this.list[this.curGood].detail[this.curPackageGood].remark_service_personnel_level = data.technician_grade_name
+      this.list[this.curGood].detail[this.curPackageGood].remark_service_personnel_price = data.service_fee
+      this.list = Object.assign([], this.list)
       this._controlPackageStaffPicker()
     },
     _openDesc(index, index2) {
@@ -405,7 +455,58 @@ export default {
         })
       })
     },
+    _staffPrice() {
+      let total = 0
+      this.list.forEach(item => {
+        if (item.type === '1' && item.need_service_personnel == '1' && item.remark_service_personnel !== '0') {
+          total += item.remark_service_personnel_price * 100
+        } else if (item.type === '4') {
+          item.detail.forEach(item2 => {
+            if (item2.type === '1' && item2.need_service_personnel == '1' && item2.remark_service_personnel !== '0') {
+              total += item2.remark_service_personnel_price * 100
+            }
+          })
+        }
+      })
+      return total
+    },
+    _getStaffInfo(item) {
+      return `${item.remark_service_personnel_name} - ${item.remark_service_personnel_level} （ ¥ ${item.remark_service_personnel_price}）`
+    },
     _onSubmit() {
+      if (this._orderSubmitText === '结算') {
+        console.log('结算')
+      } else {
+        let result = {}
+        this.list.forEach(item => {
+          if (item.status === '0') {
+            if (item.type === '4') {
+              item.detail.forEach(i => {
+                if (i.remark_service_personnel !== '0') {
+                  result[i.id] = i.remark_service_personnel
+                }
+              })
+            } else {
+              if (item.remark_service_personnel !== '0') {
+                result[item.id] = item.remark_service_personnel
+              }
+            }
+          }
+        })
+        this.commitOrder({ order: result, s_user_id: this.$route.params.flag, order_id: this.list[0].order_id }).then(
+          () => {
+            this.$toast.success({
+              message: '订单已提交',
+              duration: 800,
+              onClose: () => {
+                this._getUserOrder()
+              },
+            })
+            this.list = []
+            this.recommendList = []
+          }
+        )
+      }
       // if (this.site_name === '') {
       //   this.$toast({
       //     message: '请选择桌台 / 座位',
@@ -416,40 +517,12 @@ export default {
       //   })
       //   return false
       // }
-      let result = {}
-      this.list.forEach(item => {
-        if (item.status === '0') {
-          if (item.type === '4') {
-            item.detail.forEach(i => {
-              if (i.remark_service_personnel !== '0') {
-                result[i.id] = i.remark_service_personnel
-              }
-            })
-          } else {
-            if (item.remark_service_personnel !== '0') {
-              result[item.id] = item.remark_service_personnel
-            }
-          }
-        }
-      })
-      // if (Object.keys(result).length === 0) {
-      //   this.$toast({
-      //     message: '订单无变化，无需重新提交',
-      //     duration: 1000,
-      //   })
-      //   return
+      // console.log(this._staffPrice())
+
+      // console.log(this.list)
+      // if (this.list.length >= 0) {
+      //   return false
       // }
-      this.commitOrder({ order: result, s_user_id: this.$route.params.flag, order_id: this.list[0].order_id }).then(
-        () => {
-          this.$toast.success({
-            message: '订单已提交',
-            duration: 800,
-            onClose: () => {
-              this._getUserOrder()
-            },
-          })
-        }
-      )
     },
   },
 }
@@ -516,5 +589,22 @@ export default {
   .van-tag--danger {
     background: green;
   }
+}
+
+/deep/.van-collapse-item__content {
+  color: #555;
+  padding: 10px 4px;
+  .van-button {
+    margin-left: 0;
+  }
+}
+
+.package-staff {
+  font-size: 10px;
+  color: #777;
+}
+
+.van-card__footer {
+  margin-top: 8px;
 }
 </style>

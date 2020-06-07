@@ -25,6 +25,22 @@ export default {
       })
     })
   },
+  // 获取验证码
+  getSms(context, payload) {
+    return new Promise((resolve, reject) => {
+      commonAPI.getSms(payload).then(data => {
+        data ? resolve(data) : reject()
+      })
+    })
+  },
+  // 注册
+  registerAcc(context, payload) {
+    return new Promise((resolve, reject) => {
+      commonAPI.registerAcc(payload).then(data => {
+        data ? resolve(data) : reject()
+      })
+    })
+  },
   // 获取闲置标识
   getFlag(context, payload) {
     return new Promise((resolve, reject) => {

@@ -6,7 +6,15 @@ export default {
     axios.post('/appapi.php?c=Storestaff&a=staffMessageList', {
       ...payload,
       'Device-Id': 'packapp',
-      app_version: 85,
+      ticket: localStorage.getItem('local_storestaff_ticket')
+        ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
+        : '',
+    }),
+  // 处理消息
+  dealMessage: payload =>
+    axios.post('/appapi.php?c=Storestaff&a=dealStaffMessage', {
+      ...payload,
+      'Device-Id': 'packapp',
       ticket: localStorage.getItem('local_storestaff_ticket')
         ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
         : '',

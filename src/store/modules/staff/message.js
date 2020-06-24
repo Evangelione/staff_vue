@@ -9,4 +9,12 @@ export default {
       })
     })
   },
+  // 处理消息
+  dealMessage(context, payload) {
+    return new Promise((resolve, reject) => {
+      staffAPI.dealMessage(payload).then(data => {
+        data ? resolve(data) : reject()
+      })
+    })
+  },
 }

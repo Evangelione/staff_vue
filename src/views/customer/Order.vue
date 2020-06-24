@@ -47,13 +47,15 @@
           <span
             style="padding: 4px 0;"
             v-if="item.need_service_personnel === '1' && item.remark_service_personnel !== '0' && item.type !== '4'"
-          >指定：{{ _getStaffInfo(item) }}</span>
+            >指定：{{ _getStaffInfo(item) }}</span
+          >
           <van-button
             @click="_controlStaffPicker(index, item)"
             size="small"
             style="margin-top: 20px"
             v-if="item.type != '2' && item.status == '0' && item.need_service_personnel === '1'"
-          >指定服务人员</van-button>
+            >指定服务人员</van-button
+          >
 
           <van-collapse v-if="item.type === '4'" v-model="activeNames">
             <van-collapse-item :name="item.id" title="套餐包含内容">
@@ -66,13 +68,15 @@
                     size="mini"
                     style="margin-left: 40px;padding: 0 4px;"
                     v-if="i.type != '2' && i.status == '0' && i.need_service_personnel === '1'"
-                  >指定服务人员</van-button>
+                    >指定服务人员</van-button
+                  >
                 </div>
                 <div style="text-align: left;">
                   <span
                     class="package-staff"
                     v-if="i.need_service_personnel === '1' && i.remark_service_personnel !== '0'"
-                  >指定：{{ _getStaffInfo(i) }}</span>
+                    >指定：{{ _getStaffInfo(i) }}</span
+                  >
                 </div>
               </div>
             </van-collapse-item>
@@ -273,7 +277,7 @@ export default {
 
   methods: {
     ...mapActions(['getFlag', 'getStaff', 'commitOrder', 'getRecommendList', 'addToCart']),
-    ...mapActions('commodity', ['getUserOrder']),
+    ...mapActions('commodity', ['getUserOrder', 'settlementOrder']),
     _getUserOrder() {
       this.loading = true
       this.getUserOrder({ s_id: this.$route.params.flag }).then(res => {
@@ -476,8 +480,13 @@ export default {
     _onSubmit() {
       if (this._orderSubmitText === '结算') {
         console.log('结算')
+        this.settlementOrder({ order_id: this.list[0].order_id }).then(res => {
+          debugger
+          window.location.href = res.url
+        })
       } else {
         let result = {}
+        let isFirst = true
         this.list.forEach(item => {
           if (item.status === '0') {
             if (item.type === '4') {
@@ -491,6 +500,8 @@ export default {
                 result[item.id] = item.remark_service_personnel
               }
             }
+          } else {
+            isFirst = false
           }
         })
         this.commitOrder({ order: result, s_user_id: this.$route.params.flag, order_id: this.list[0].order_id }).then(
@@ -504,6 +515,9 @@ export default {
             })
             this.list = []
             this.recommendList = []
+            this.pushStaff({ isFirst }).then(res => {
+              console.log(res)
+            })
           }
         )
       }

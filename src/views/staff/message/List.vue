@@ -1,14 +1,13 @@
 <template>
   <div>
-    首页
-    <van-button @click="_goLogin">跳转登录</van-button>
+    <van-nav-bar @click-left="$goBack" fixed left-arrow title="消息列表" />
+    <div class="nav-bar-holder"></div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'index',
-
+  name: 'systemMessage',
   mixins: [],
 
   components: {},
@@ -29,17 +28,7 @@ export default {
 
   destroyed() {},
 
-  methods: {
-    _goLogin() {
-      this.$router.push({
-        name: 'Login',
-        params: {
-          id: 313,
-          flag: 63,
-        },
-      })
-    },
-  },
+  methods: {},
 }
 </script>
 

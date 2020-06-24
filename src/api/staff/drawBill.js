@@ -7,7 +7,9 @@ export default {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
-      ticket: localStorage.getItem('local_storestaff_ticket').replace('str||', ''),
+      ticket: localStorage.getItem('local_storestaff_ticket')
+        ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
+        : '',
     }),
   // 读取服务商品列表
   getServiceList: payload =>
@@ -15,7 +17,9 @@ export default {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
-      ticket: localStorage.getItem('local_storestaff_ticket').replace('str||', ''),
+      ticket: localStorage.getItem('local_storestaff_ticket')
+        ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
+        : '',
     }),
   // 读取套餐列表
   getPackageList: payload =>
@@ -23,7 +27,9 @@ export default {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
-      ticket: localStorage.getItem('local_storestaff_ticket').replace('str||', ''),
+      ticket: localStorage.getItem('local_storestaff_ticket')
+        ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
+        : '',
     }),
   // 获取挂单中列表
   getEntryOrderList: payload =>
@@ -31,7 +37,9 @@ export default {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
-      ticket: localStorage.getItem('local_storestaff_ticket').replace('str||', ''),
+      ticket: localStorage.getItem('local_storestaff_ticket')
+        ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
+        : '',
     }),
   // 获取结算中的订单
   getBillingOrder: payload =>
@@ -39,7 +47,9 @@ export default {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
-      ticket: localStorage.getItem('local_storestaff_ticket').replace('str||', ''),
+      ticket: localStorage.getItem('local_storestaff_ticket')
+        ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
+        : '',
     }),
   // 获取空闲标识列表
   getFreeMarkList: payload =>
@@ -47,7 +57,9 @@ export default {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
-      ticket: localStorage.getItem('local_storestaff_ticket').replace('str||', ''),
+      ticket: localStorage.getItem('local_storestaff_ticket')
+        ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
+        : '',
     }),
   // 获取空闲服务人员列表
   getFreeStaffList: payload =>
@@ -55,7 +67,9 @@ export default {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
-      ticket: localStorage.getItem('local_storestaff_ticket').replace('str||', ''),
+      ticket: localStorage.getItem('local_storestaff_ticket')
+        ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
+        : '',
     }),
   // 挂单操作
   entryOrder: payload =>
@@ -63,7 +77,9 @@ export default {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
-      ticket: localStorage.getItem('local_storestaff_ticket').replace('str||', ''),
+      ticket: localStorage.getItem('local_storestaff_ticket')
+        ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
+        : '',
     }),
   // 获取订单数量
   getOrderCount: payload =>
@@ -71,7 +87,9 @@ export default {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
-      ticket: localStorage.getItem('local_storestaff_ticket').replace('str||', ''),
+      ticket: localStorage.getItem('local_storestaff_ticket')
+        ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
+        : '',
     }),
   // 拉取订单到结算中
   pullOrder: payload =>
@@ -79,7 +97,9 @@ export default {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
-      ticket: localStorage.getItem('local_storestaff_ticket').replace('str||', ''),
+      ticket: localStorage.getItem('local_storestaff_ticket')
+        ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
+        : '',
     }),
   // 取消订单
   cancelOrder: payload =>
@@ -87,7 +107,9 @@ export default {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
-      ticket: localStorage.getItem('local_storestaff_ticket').replace('str||', ''),
+      ticket: localStorage.getItem('local_storestaff_ticket')
+        ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
+        : '',
     }),
   // 添加商品
   commitOrder: payload =>
@@ -95,7 +117,9 @@ export default {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
-      ticket: localStorage.getItem('local_storestaff_ticket').replace('str||', ''),
+      ticket: localStorage.getItem('local_storestaff_ticket')
+        ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
+        : '',
     }),
   // 修改订单标识
   changeOrderMark: payload =>
@@ -103,7 +127,9 @@ export default {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
-      ticket: localStorage.getItem('local_storestaff_ticket').replace('str||', ''),
+      ticket: localStorage.getItem('local_storestaff_ticket')
+        ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
+        : '',
     }),
   // 指派服务人员
   appointStaff: payload =>
@@ -111,7 +137,9 @@ export default {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
-      ticket: localStorage.getItem('local_storestaff_ticket').replace('str||', ''),
+      ticket: localStorage.getItem('local_storestaff_ticket')
+        ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
+        : '',
     }),
   // 撤下服务人员
   unDoStaff: payload =>
@@ -119,7 +147,9 @@ export default {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
-      ticket: localStorage.getItem('local_storestaff_ticket').replace('str||', ''),
+      ticket: localStorage.getItem('local_storestaff_ticket')
+        ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
+        : '',
     }),
   // 追加服务人员
   addStaff: payload =>
@@ -127,7 +157,9 @@ export default {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
-      ticket: localStorage.getItem('local_storestaff_ticket').replace('str||', ''),
+      ticket: localStorage.getItem('local_storestaff_ticket')
+        ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
+        : '',
     }),
   // 替服务人员接单
   insteadOrders: payload =>
@@ -135,7 +167,9 @@ export default {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
-      ticket: localStorage.getItem('local_storestaff_ticket').replace('str||', ''),
+      ticket: localStorage.getItem('local_storestaff_ticket')
+        ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
+        : '',
     }),
   // 替服务人员完成
   insteadFinish: payload =>
@@ -143,7 +177,9 @@ export default {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
-      ticket: localStorage.getItem('local_storestaff_ticket').replace('str||', ''),
+      ticket: localStorage.getItem('local_storestaff_ticket')
+        ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
+        : '',
     }),
   // 服务返工
   rework: payload =>
@@ -151,7 +187,9 @@ export default {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
-      ticket: localStorage.getItem('local_storestaff_ticket').replace('str||', ''),
+      ticket: localStorage.getItem('local_storestaff_ticket')
+        ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
+        : '',
     }),
   // 验收合格
   acceptance: payload =>
@@ -159,7 +197,9 @@ export default {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
-      ticket: localStorage.getItem('local_storestaff_ticket').replace('str||', ''),
+      ticket: localStorage.getItem('local_storestaff_ticket')
+        ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
+        : '',
     }),
   // 已结算订单列表
   getSettledOrderList: payload =>
@@ -167,7 +207,9 @@ export default {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
-      ticket: localStorage.getItem('local_storestaff_ticket').replace('str||', ''),
+      ticket: localStorage.getItem('local_storestaff_ticket')
+        ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
+        : '',
     }),
   // 已取消订单列表
   getCancelOrderList: payload =>
@@ -175,7 +217,9 @@ export default {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
-      ticket: localStorage.getItem('local_storestaff_ticket').replace('str||', ''),
+      ticket: localStorage.getItem('local_storestaff_ticket')
+        ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
+        : '',
     }),
   // 修改商品价格，数量，实付金额
   modifyGood: payload =>
@@ -183,7 +227,9 @@ export default {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
-      ticket: localStorage.getItem('local_storestaff_ticket').replace('str||', ''),
+      ticket: localStorage.getItem('local_storestaff_ticket')
+        ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
+        : '',
     }),
   // 结算订单
   payOrder: payload =>
@@ -191,6 +237,8 @@ export default {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
-      ticket: localStorage.getItem('local_storestaff_ticket').replace('str||', ''),
+      ticket: localStorage.getItem('local_storestaff_ticket')
+        ? localStorage.getItem('local_storestaff_ticket').replace('str||', '')
+        : '',
     }),
 }

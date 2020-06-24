@@ -78,9 +78,16 @@ const actions = {
   },
   // 加入购物车
   addOrder(context, payload) {
-    console.log(payload)
     return new Promise((resolve, reject) => {
       commodityAPI.addOrder(payload).then(data => {
+        data ? resolve(data) : reject()
+      })
+    })
+  },
+  // 结算订单
+  settlementOrder(context, payload) {
+    return new Promise((resolve, reject) => {
+      commodityAPI.settlementOrder(payload).then(data => {
         data ? resolve(data) : reject()
       })
     })

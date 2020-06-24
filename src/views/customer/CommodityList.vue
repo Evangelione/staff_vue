@@ -19,8 +19,7 @@
               <template #footer>
                 <van-stepper
                   @minus="_minus(2, i.goods_id)"
-                  @plus="_plus(2, i.goods_id, i.price, i.pic_arr[0].url, i.name)"
-                  default-value="0"
+                  @plus="_plus(2, i.goods_id, i.price)"
                   disable-input
                   min="0"
                   v-model="i.num"
@@ -46,11 +45,10 @@
             >
               <template #footer>
                 <van-stepper
-                  :min="i.min"
                   @minus="_minus(1, i.appoint_id)"
-                  @plus="_plus(1, i.appoint_id, i.old_price, i.pic, i.appoint_name)"
-                  default-value="0"
+                  @plus="_plus(1, i.appoint_id, i.old_price)"
                   disable-input
+                  min="0"
                   v-model="i.num"
                 />
               </template>
@@ -74,11 +72,10 @@
             >
               <template #footer>
                 <van-stepper
-                  :min="i.min"
                   @minus="_minus(4, i.package_id)"
-                  @plus="_plus(4, i.package_id, i.price, i.pic, i.name)"
-                  default-value="0"
+                  @plus="_plus(4, i.package_id, i.price)"
                   disable-input
+                  min="0"
                   v-model="i.num"
                 />
               </template>
@@ -96,7 +93,7 @@
     <van-submit-bar
       :price="_price"
       @submit="_onSubmit"
-      button-text="加入购物车"
+      button-text="确认选择"
       tip="选择的商品将会您的加入购物车"
       tip-icon="info-o"
     />
@@ -149,128 +146,60 @@ export default {
   created() {},
 
   mounted() {
-    // if (!this.$route.params.flag) {
-    //   this.cart = localStorage.getItem('staffOrderCart') ? JSON.parse(localStorage.getItem('staffOrderCart')) : []
-    // }
     // 读取商品列表 && 向购物车中添加已购买数据
-    this.getRetailList({ staff_id: this.$route.params.id, order_id: this.$route.params.flag }).then(res => {
+    this.getRetailList({ store_id: this.$route.params.id, s_id: this.$route.params.flag }).then(res => {
       let list = []
       for (let i in res) {
         list.push(res[i])
       }
 
-      // // 从缓存拿数据
-      // if (!this.$route.params.flag) {
-      //   list.forEach(item => {
-      //     item.goods_list.forEach(i => {
-      //       this.cart.find(g => {
-      //         if (g.type === 2 && g.id === i.goods_id) {
-      //           this.items[0].badge += g.num
-      //           i.num = g.num
-      //         }
-      //       })
-      //     })
-      //   })
-      // } else {
       // 循环所有商品，找出num>1的商品并添加到购物车中
       list.forEach(item => {
         item.goods_list.forEach(i => {
           if (i.num > 0) {
             this.items[0].badge += i.num
-            this.cart.push({
-              id: i.goods_id,
-              num: i.num,
-              type: 2,
-              price: i.price,
-              pic: i.pic_arr[0],
-              name: i.name,
-            })
+            this.cart.push({ id: i.goods_id, num: i.num, type: 2, price: i.price })
           }
         })
       })
-      // }
       this.retailList = list
     })
 
     // 读取服务列表 && 向购物车中添加已购买数据
-    this.getServiceList({ staff_id: this.$route.params.id, order_id: this.$route.params.flag }).then(res => {
+    this.getServiceList({ store_id: this.$route.params.id, s_id: this.$route.params.flag }).then(res => {
       let list = []
       for (let i in res) {
         list.push(res[i])
       }
 
-      // // 从缓存拿数据
-      // if (!this.$route.params.flag) {
-      //   list.forEach(item => {
-      //     item.goods_list.forEach(i => {
-      //       this.cart.find(g => {
-      //         if (g.type === 1 && g.id === i.appoint_id) {
-      //           this.items[1].badge += g.num
-      //           i.num = g.num
-      //         }
-      //       })
-      //     })
-      //   })
-      // } else {
       // 循环所有服务，找出num>1的商品并添加到购物车中
       list.forEach(item => {
         item.goods_list.forEach(i => {
-          i.min = i.num
           if (i.num > 0) {
             this.items[1].badge += i.num
-            this.cart.push({
-              id: i.appoint_id,
-              num: i.num,
-              type: 1,
-              price: i.old_price,
-              pic: i.pic,
-              name: i.appoint_name,
-            })
+            this.cart.push({ id: i.appoint_id, num: i.num, type: 1, price: i.old_price })
           }
         })
       })
-      // }
       this.serviceList = list
     })
 
     // 读取套餐列表 && 向购物车中添加已购买数据
-    this.getPackageList({ staff_id: this.$route.params.id, order_id: this.$route.params.flag }).then(res => {
+    this.getPackageList({ store_id: this.$route.params.id, s_id: this.$route.params.flag }).then(res => {
       let list = []
       for (let i in res) {
         list.push(res[i])
       }
 
-      // // 从缓存拿数据
-      // if (!this.$route.params.flag) {
-      //   list.forEach(item => {
-      //     item.goods_list.forEach(i => {
-      //       this.cart.find(g => {
-      //         if (g.type === 4 && g.id === i.package_id) {
-      //           this.items[2].badge += g.num
-      //           i.num = g.num
-      //         }
-      //       })
-      //     })
-      //   })
-      // } else {
       // 循环所有套餐，找出num>1的商品并添加到购物车中
       list.forEach(item => {
         item.goods_list.forEach(i => {
-          i.min = i.num
           if (i.num > 0) {
             this.items[2].badge += i.num
-            this.cart.push({
-              id: i.package_id,
-              num: i.num,
-              type: 4,
-              price: i.price,
-              pic: i.pic,
-              name: i.name,
-            })
+            this.cart.push({ id: i.package_id, num: i.num, type: 4, price: i.price })
           }
         })
       })
-      // }
       this.packageList = list
     })
   },
@@ -278,7 +207,7 @@ export default {
   destroyed() {},
 
   methods: {
-    ...mapActions('staffOrder', ['getRetailList', 'getServiceList', 'getPackageList', 'entryOrder', 'commitOrder']),
+    ...mapActions('commodity', ['getRetailList', 'getServiceList', 'getPackageList', 'addOrder']),
     _minus(type, id) {
       const index = this.cart.findIndex(item => {
         if (item.id === id) {
@@ -295,7 +224,7 @@ export default {
       }
       this._changeNum(type, 1)
     },
-    _plus(type, id, price, pic, name) {
+    _plus(type, id, price) {
       const index = this.cart.findIndex(item => {
         if (item.id === id) {
           return item
@@ -304,16 +233,16 @@ export default {
       if (index !== -1) {
         this.cart[index].num += 1
       } else {
-        this.cart.push({ id: id, num: 1, type: type, price: price, pic: pic, name: name })
+        this.cart.push({ id: id, num: 1, type: type, price: price })
       }
       this._changeNum(type, 0)
     },
     _changeNum(type, operation) {
       let num = 0
-      if (operation === 0) {
-        num = 1
-      } else {
+      if (operation === 1) {
         num = -1
+      } else {
+        num = 1
       }
       if (type === 1) {
         this.items[1].badge += num
@@ -326,37 +255,15 @@ export default {
       }
     },
     _onSubmit() {
-      if (this.$route.params.flag) {
-        this.commitOrder({ list: this.cart, order_id: this.$route.params.flag }).then(() => {
-          this.$toast.success({
-            message: '商品已加入购物车',
-            duration: 800,
-            onClose: () => {
-              this.$router.replace({ path: `/staffOrder/${this.$route.params.id}` })
-            },
-          })
+      this.addOrder({ list: this.cart, s_id: this.$route.params.flag, store_id: this.$route.params.id }).then(() => {
+        this.$toast.success({
+          message: '操作成功',
+          duration: 800,
+          onClose: () => {
+            this.$router.replace({ path: `/order/${this.$route.params.id}/${this.$route.params.flag}` })
+          },
         })
-      } else {
-        // 存入本地
-        // localStorage.setItem('staffOrderCart', JSON.stringify(this.cart))
-        // this.$toast.success({
-        //   message: '商品已加入购物车',
-        //   duration: 800,
-        //   onClose: () => {
-        //     this.$goBack()
-        //   },
-        // })
-
-        this.commitOrder({ list: this.cart }).then(() => {
-          this.$toast.success({
-            message: '商品已加入购物车',
-            duration: 800,
-            onClose: () => {
-              this.$router.replace({ path: `/staffOrder/${this.$route.params.id}` })
-            },
-          })
-        })
-      }
+      })
     },
   },
 }

@@ -2,7 +2,7 @@
   <div style="height: 100vh;">
     <van-nav-bar :border="false" @click-left="$goBack" fixed left-arrow title="开单收银" v-show="!status" />
     <div class="nav-bar-holder" v-show="!status"></div>
-    <div v-show="!status">
+    <div v-show="!status" class="search-bar-parent">
       <div class="search-bar">
         <van-row align="center" gutter="20" type="flex">
           <van-col span="22">
@@ -46,7 +46,7 @@
             <van-icon :badge="entryCount" class="badge" />
           </div>
           <div
-            @click="$router.push(`/staffOrder/settlement/${$route.params.id}`)"
+            @click="$router.push(`/staffOrder/settlement`)"
             class="shortcut-bar-item"
             style="background: lightgreen;"
           >
@@ -305,12 +305,13 @@ export default {
     _goOrder() {
       let order_id = this.curOrder[0] && this.curOrder[0].order_id
       if (order_id) {
-        this.$router.push(`/staffOrder/commodity/${this.$route.params.id}/${order_id}`)
+        this.$router.push(`/staffOrder/commodity/${order_id}`)
       } else {
-        this.$router.push(`/staffOrder/commodity/${this.$route.params.id}`)
+        this.$router.push(`/staffOrder/commodity`)
       }
     },
     _addGoodToCart(data) {
+      debugger
       let order_id = this.curOrder[0] && this.curOrder[0].order_id
       let cart = this.curOrder.map(item => {
         if (
@@ -384,7 +385,7 @@ export default {
         }
       } else {
         // 当前无商品
-        this.$router.push(`/staffOrder/entryOrder/${this.$route.params.id}`)
+        this.$router.push(`/staffOrder/entryOrder`)
       }
     },
     _getMarkList() {
@@ -454,7 +455,7 @@ export default {
           break
       }
       this.timer = setTimeout(() => {
-        this[method]({ staff_id: this.$route.params.id, name: data }).then(res => {
+        this[method]({ name: data }).then(res => {
           let result = []
           let list = []
           for (let i in res) {
@@ -481,9 +482,14 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.search-bar-parent {
+  z-index: 99;
+  margin-top: -5px;
+}
+
 .search-bar {
   background: @primary-c;
-  padding: 0 20px 15px 20px;
+  padding: 15px 20px 15px 20px;
   .van-field {
     height: 30px;
     line-height: 30px;

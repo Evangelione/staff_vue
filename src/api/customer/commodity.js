@@ -32,4 +32,11 @@ export default {
       ticket: localStorage.getItem('ticket'),
     })
   },
+  // 结算订单
+  settlementOrder: payload => {
+    return axios.post('/wap.php?g=Wap&c=ScanOrder&a=payOrder', {
+      ...payload,
+      ticket: localStorage.getItem('ticket'),
+    })
+  },
 }

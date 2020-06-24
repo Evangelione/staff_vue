@@ -7,47 +7,63 @@ const routes = [
   // {
   //   path: '/',
   //   name: 'Index',
-  //   component: () => import(/* webpackChunkName: "index" */ '../views/Index.vue'),
+  //   component: () => import(/* webpackChunkName: "index" */ '../views/Index'),
   // },
   {
     path: '/login/:id/:flag',
     name: 'Login',
-    component: () => import(/* webpackChunkName: "login" */ '../views/Login.vue'),
+    component: () => import(/* webpackChunkName: "login" */ '../views/customer/Login'),
   },
   {
     path: '/order/:id/:flag',
     name: 'Order',
-    component: () => import(/* webpackChunkName: "order" */ '../views/Order.vue'),
+    component: () => import(/* webpackChunkName: "order" */ '../views/customer/Order'),
   },
   {
-    path: '/bind/:order/:staff?',
+    path: '/bind/:order/:/face/:staff?',
     name: 'Bind',
-    component: () => import(/* webpackChunkName: "bind" */ '../views/Bind.vue'),
+    component: () => import(/* webpackChunkName: "bind" */ '../views/customer/Bind'),
   },
   {
     path: '/commodity/:id/:flag',
     name: 'Commodity',
-    component: () => import(/* webpackChunkName: "commodity" */ '../views/CommodityList.vue'),
+    component: () => import(/* webpackChunkName: "commodity" */ '../views/customer/CommodityList'),
   },
   {
-    path: '/staffOrder/:id',
+    path: '/staffOrder',
     name: 'StaffOrder',
-    component: () => import(/* webpackChunkName: "staffOrder" */ '../views/staff/StaffOrder.vue'),
+    component: () => import(/* webpackChunkName: "staffOrder" */ '../views/staff/drawbill/StaffOrder'),
   },
   {
-    path: '/staffOrder/commodity/:id/:flag?',
+    path: '/staffOrder/commodity/:orderId?',
     name: 'StaffOrderCommodity',
-    component: () => import(/* webpackChunkName: "staffOrderCommodity" */ '../views/staff/CommodityList.vue'),
+    component: () => import(/* webpackChunkName: "staffOrderCommodity" */ '../views/staff/drawbill/CommodityList'),
   },
   {
-    path: '/staffOrder/entryOrder/:id',
+    path: '/staffOrder/entryOrder',
     name: 'EntryOrder',
-    component: () => import(/* webpackChunkName: "entryOrder" */ '../views/staff/EntryOrder.vue'),
+    component: () => import(/* webpackChunkName: "entryOrder" */ '../views/staff/drawbill/EntryOrder'),
   },
   {
-    path: '/staffOrder/settlement/:id',
+    path: '/staffOrder/settlement',
     name: 'Settlement',
-    component: () => import(/* webpackChunkName: "settlement" */ '../views/staff/Settlement.vue'),
+    component: () => import(/* webpackChunkName: "settlement" */ '../views/staff/drawbill/Settlement'),
+  },
+  {
+    path: '/staff/chat/withRobot',
+    name: 'Settlement',
+    component: () => import(/* webpackChunkName: "settlement" */ '../views/staff/chat/WithRobot'),
+  },
+  {
+    path: '/staff/message',
+    name: 'Message',
+    component: () => import(/* webpackChunkName: "settlement" */ '../views/staff/message'),
+    children: [
+      {
+        path: '',
+        component: () => import(/* webpackChunkName: "settlement" */ '../views/staff/message/List'),
+      },
+    ],
   },
 ]
 

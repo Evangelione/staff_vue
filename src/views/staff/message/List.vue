@@ -6,6 +6,7 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 export default {
   name: 'systemMessage',
   mixins: [],
@@ -24,11 +25,20 @@ export default {
 
   created() {},
 
-  mounted() {},
+  mounted() {
+    this._getMessageList()
+  },
 
   destroyed() {},
 
-  methods: {},
+  methods: {
+    ...mapActions('staff', ['getMessageList']),
+    _getMessageList() {
+      this.getMessageList().then(res => {
+        console.log(res)
+      })
+    },
+  },
 }
 </script>
 

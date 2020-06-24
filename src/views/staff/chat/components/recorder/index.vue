@@ -1,13 +1,13 @@
 <template>
   <div>
-    <a-modal :title="null" :closable="false" v-model="recoderVisible" width="0" centered :footer="null">
-      <div class="recoder" v-show="recoderVisible">
+    <van-popup v-model="reCoderVisible">
+      <div class="reCoder" v-show="reCoderVisible">
         <div class="sound-waves">
           <div
-            v-for="(iheight, index) in randomheight"
+            v-for="(iHeight, index) in randomHeight"
             :key="index"
             class="wavesItem"
-            :style="{ height: iheight + 'px' }"
+            :style="{ height: iHeight + 'px' }"
           ></div>
         </div>
         <div class="tipText">按住开始录音</div>
@@ -121,30 +121,10 @@
             ></path></svg
         ></a-button>
       </div>
-    </a-modal>
+    </van-popup>
 
     <div class="wrap">
-      <!-- <input
-				type="button"
-				@mousedown.prevent="mouseStart"
-				@mouseup.prevent="mouseEnd('audio')"
-				v-model="form.time"
-			/> -->
-      <!-- <input
-			value="语音识别"
-			type="button"
-			@mousedown.prevent="mouseStart"
-			@mouseup.prevent="mouseEnd('turnText')"
-			/> -->
-      <!-- <audio
-			id="audioInput"
-			v-if="audioSrc"
-			:src="audioSrc"
-			controls="controls"
-			class="content-audio"
-			style="display: block;"
-			>语音</audio> -->
-      <van-icon name="volume-o" style="font-size: 20px; margin-left: 8px;" @click="show" />
+      <van-icon name="volume-o" size="20" style="margin-left: 10px;" @click="show" />
     </div>
   </div>
 </template>
@@ -154,6 +134,7 @@ import WebIM from 'easemob-websdk'
 import recording from './recordAudio.js'
 import { mapActions } from 'vuex'
 export default {
+  props: ['user'],
   data() {
     return {
       form: {
@@ -168,9 +149,9 @@ export default {
       endTime: '', // 语音结束
       audioSrc: '',
 
-      randomheight: [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+      randomHeight: [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
       runAnimation: false,
-      recoderVisible: false,
+      reCoderVisible: false,
     }
   },
   methods: {
@@ -184,12 +165,12 @@ export default {
     },
     onRandom() {
       let me = this
-      let _randomheight = this.randomheight.concat([])
+      let _randomHeight = this.randomHeight.concat([])
       let i = 0
-      this.$data.randomheight = _randomheight
+      this.$data.randomHeight = _randomHeight
       if (this.runAnimation) {
-        for (i; i < this.randomheight.length; i++) {
-          _randomheight[i] = 60 * Math.random().toFixed(2) + 10
+        for (i; i < this.randomHeight.length; i++) {
+          _randomHeight[i] = 60 * Math.random().toFixed(2) + 10
         }
         setTimeout(function() {
           me.onRandom()
@@ -197,15 +178,15 @@ export default {
       }
     },
     hide() {
-      this.recoderVisible = false
+      this.reCoderVisible = false
     },
     show() {
-      this.recoderVisible = true
+      this.reCoderVisible = true
     },
     // 长按说话
     mouseStart(e) {
       e.preventDefault()
-      this.$data.runAnimation = true
+      this.runAnimation = true
       this.onRandom()
       this.clearTimer()
       this.startTime = new Date().getTime()
@@ -237,8 +218,9 @@ export default {
 
     // 松开时上传语音
     mouseEnd(type) {
-      this.$data.runAnimation = false
-      // this.$data.randomheight = this.randomheight.map(i => i = 30)
+      let that = this
+      this.runAnimation = false
+      // this.$data.randomHeight = this.randomHeight.map(i => i = 30)
       this.hide()
       this.clearTimer()
       this.endTime = new Date().getTime()
@@ -251,58 +233,36 @@ export default {
         let blob = this.recorder.getBlob()
         // 发送语音功能
         if (type === 'audio') {
-          this.$data.audioSrc = WebIM.utils.parseDownloadResponse.call(WebIM.conn, blob)
-          const { name, params } = this.$route
-
-          // let file = new File(
-          // 	[blob],
-          // 	"msr-" + new Date().toISOString().replace(/:|\./g, "-") + ".webm",
-          // 	{
-          // 		type: "video/webm"
-          // 	}
-          // );
-
-          let uri = {
-            url: WebIM.utils.parseDownloadResponse.call(WebIM.conn, blob),
-            filename: 'audio',
-            filetype: 'audio',
-            data: blob,
+          var id = WebIM.conn.getUniqueId() // 生成本地消息id
+          var msg = new WebIM.message('audio', id) // 创建音频消息
+          var option = {
+            apiUrl: WebIM.config.apiURL,
+            file: {
+              filename: 'audio',
+              filetype: 'audio',
+              data: blob,
+            },
+            to: this.user, // 接收消息对象
+            roomType: false,
+            onFileUploadError: function() {
+              // 消息上传失败
+              console.log('onFileUploadError')
+            },
+            onFileUploadComplete: function() {
+              // 消息上传成功
+              console.log('onFileUploadComplete')
+            },
+            success: function(id, mid) {
+              // 消息发送成功
+              that.$emit('saveAudioRecord', blob, mid)
+              console.log('Success')
+            },
+            flashUpload: WebIM.flashUpload,
+            ext: { file_length: blob.size },
           }
-          this.sendRecorder({
-            type: name,
-            useId: params.id,
-            file: uri,
-          })
+          msg.set(option)
+          WebIM.conn.send(msg.body)
         }
-
-        // 语音识别功能
-        // if(type === "turnText"){
-        // 	const apiURL = `https://mproxy.microduino.cn/baidu/asr`;
-        // 	let formData = new FormData();
-        // 	formData.append("file", bold);
-        // 	formData.append("format", "wav");
-        // 	formData.append("rate", 16000);
-
-        // 	let audioApi = fetch(apiURL, { method: "POST", body: formData })
-        // 	.then(response => {
-        // 		return response.json().then(json => ({ json, response }));
-        // 	})
-        // 	.then(({ json, response }) => {
-        // 		if(!response.ok){
-        // 			return Promise.reject(json);
-        // 		}
-        // 		return json;
-        // 	});
-        // 	audioApi
-        // 	.then(res => {
-        // 		console.log("res>>>", res);
-        // 		let txt = JSON.stringify(res);
-        // 		console.log("txt=", txt);
-        // 	})
-        // 	["catch"](err => {
-        // 		console.error("baidu api err = ", err);
-        // 	});
-        // }
       }
     },
   },
@@ -310,10 +270,11 @@ export default {
 </script>
 
 <style scoped>
-.recoder {
-  /* position: fixed;
-      left: calc(50% - 100px);
-      top: calc(50% - 100px); */
+.van-popup {
+  border-radius: 10px;
+  padding: 15px;
+}
+.reCoder {
   position: relative;
   box-shadow: 0 0 32px rgba(0, 0, 0, 0.15);
   width: 200px;

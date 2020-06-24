@@ -246,7 +246,7 @@ export default {
   destroyed() {},
 
   methods: {
-    ...mapActions('staffOrder', [
+    ...mapActions('staff', [
       'commitOrder',
       'getRetailList',
       'getServiceList',

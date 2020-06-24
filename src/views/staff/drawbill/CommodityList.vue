@@ -10,7 +10,7 @@
             <van-index-anchor :index="item.sort_name" />
             <van-card
               :key="i.goods_id"
-              :num="i.stock_num === '-1' ? '∞' : i.stock_num"
+              :num="i.stock_num == '-1' ? '∞' : i.stock_num"
               :price="i.price"
               :thumb="i.pic_arr[0].url"
               :title="i.name"
@@ -278,7 +278,7 @@ export default {
   destroyed() {},
 
   methods: {
-    ...mapActions('staffOrder', ['getRetailList', 'getServiceList', 'getPackageList', 'entryOrder', 'commitOrder']),
+    ...mapActions('staff', ['getRetailList', 'getServiceList', 'getPackageList', 'entryOrder', 'commitOrder']),
     _minus(type, id) {
       const index = this.cart.findIndex(item => {
         if (item.id === id) {

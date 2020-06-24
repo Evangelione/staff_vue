@@ -103,7 +103,7 @@ export default {
   destroyed() {},
 
   methods: {
-    ...mapActions('staffOrder', ['getSettledOrderList', 'getCancelOrderList']),
+    ...mapActions('staff', ['getSettledOrderList', 'getCancelOrderList']),
     _getSettledOrderList() {
       this.getSettledOrderList().then(res => {
         // console.log(res)

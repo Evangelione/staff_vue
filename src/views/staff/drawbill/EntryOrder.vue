@@ -220,7 +220,7 @@ export default {
   destroyed() {},
 
   methods: {
-    ...mapActions('staffOrder', [
+    ...mapActions('staff', [
       'getEntryOrderList',
       'pullOrder',
       'getFreeMarkList',

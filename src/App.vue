@@ -35,7 +35,7 @@ export default {
 body {
   font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial,
     sans-serif;
-  background-color: #f3f3f3;
+  background-color: #f6f6f6;
 }
 
 .nav-bar-holder {

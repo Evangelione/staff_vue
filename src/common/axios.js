@@ -57,11 +57,11 @@ axios.interceptors.response.use(
             onClose: () => {
               localStorage.removeItem('ticket')
               if (route.path.indexOf('order') > -1) {
-                router.push({ name: 'Login', params: router.app._route.params })
+                router.push({ name: 'Login', params: route.params })
               } else if (route.path.indexOf('staffOrder') > -1) {
                 window.location.href = 'http://www.9youke.com/packapp/storestaff/login.html'
               } else {
-                router.push({ name: 'Login', params: router.app._route.params })
+                router.push({ name: 'Login', params: route.params })
               }
             },
           })

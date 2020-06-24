@@ -2,9 +2,119 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>$Title$</title>
+  <title>Title</title>
 </head>
 <body>
-$END$
+
+<button onclick="connDb()">连接数据库</button>
+<button onclick="add()">新增数据</button>
+<button onclick="getRecord()">获取数据</button>
+<button onclick="readAll()">读取所有</button>
+<button onclick="updateRe()">更新id4</button>
+<input type="text" value="123123">
+<button onclick="deleteRE()">删除数据</button>
+<div id="divv"></div>
+<script>
+
+  let db = null
+  let dv = document.getElementById('divv')
+
+  function connDb() {
+    let request = window.indexedDB.open('my1Db', 1)
+    request.onerror = function(event) {
+      console.log('数据库打开报错')
+      dv.innerHTML = '数据库打开报错'
+    }
+    request.onsuccess = function(event) {
+      db = request.result
+      console.log('数据库打开成功')
+      dv.innerHTML = '数据库打开成功'
+    }
+    request.onupgradeneeded = function(event) {
+      db = event.target.result
+      var objectStore = db.createObjectStore('person', { keyPath: 'id' })
+      console.log('数据库onupgradeneeded')
+      dv.innerHTML = '数据库onupgradeneeded'
+    }
+  }
+
+
+  function add() {
+    var request = db.transaction('person', 'readwrite')
+      .objectStore('person')
+      .add({ id: "test_123", name: '张三', age: 24, email: 'zhangsan@example.com', daM: 'lll' })
+
+    request.onsuccess = function(event) {
+      console.log('数据写入成功')
+      dv.innerHTML = '数据写入成功'
+    }
+
+    request.onerror = function(event) {
+      console.log('数据写入失败')
+      dv.innerHTML = '数据写入失败'
+
+    }
+  }
+
+  function getRecord() {
+    var request = db.transaction('person').objectStore('person').get(6)
+    request.onerror = function(event) {
+      console.log('事务失败')
+      dv.innerHTML = '事务失败'
+    }
+
+    request.onsuccess = function(event) {
+      console.log(request.result)
+      if (request.result) {
+        console.log(request)
+        dv.innerHTML = JSON.stringify(request.result)
+      } else {
+        console.log('未获得数据记录')
+        dv.innerHTML = '未获得数据记录'
+      }
+    }
+  }
+
+  function readAll() {
+    var request = db.transaction('person').objectStore('person').openCursor()
+    request.onsuccess = function(event) {
+      var cursor = event.target.result
+      if (cursor) {
+        dv.innerHTML += JSON.stringify(cursor.value)
+        cursor.continue()
+      } else {
+        console.log('没有更多数据了！')
+      }
+    }
+  }
+
+  function updateRe() {
+    var request = db.transaction('person', 'readwrite').objectStore('person').put({
+      id: 4,
+      name: '张2123123123123123三',
+      age: 24,
+      email: 'zhangsan@example.com',
+      daM: 'lll',
+      ces: 'woshixinde',
+    })
+    request.onsuccess = function(event) {
+      console.log('数据更新成功')
+      dv.innerHTML = '数据更新成功'
+    }
+
+    request.onerror = function(event) {
+      console.log('数据更新失败')
+      dv.innerHTML = '数据更新失败'
+    }
+  }
+
+  function deleteRE() {
+    var request = db.transaction('person', 'readwrite').objectStore('person').delete("test_123")
+    request.onsuccess = function(event) {
+      console.log('数据删除成功')
+      dv.innerHTML = '数据删除成功'
+    }
+  }
+</script>
 </body>
 </html>

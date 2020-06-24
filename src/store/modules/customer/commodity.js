@@ -1,5 +1,5 @@
 import commonAPI from '@/api/common'
-import commodityAPI from '@/api/commodity'
+import commodityAPI from '@/api/customer/commodity'
 
 // initial state
 const state = {}

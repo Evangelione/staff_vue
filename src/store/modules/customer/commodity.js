@@ -22,7 +22,6 @@ const actions = {
                 return staff
               }
             })
-            console.log(staff)
             if (staff) {
               data[i].remark_service_personnel_price = staff.service_fee
               data[i].remark_service_personnel_name = staff.name
@@ -38,7 +37,6 @@ const actions = {
                     return staff
                   }
                 })
-                console.log(staff)
                 if (staff) {
                   data[i].detail[j].remark_service_personnel_price = staff.service_fee
                   data[i].detail[j].remark_service_personnel_name = staff.name
@@ -88,6 +86,14 @@ const actions = {
   settlementOrder(context, payload) {
     return new Promise((resolve, reject) => {
       commodityAPI.settlementOrder(payload).then(data => {
+        data ? resolve(data) : reject()
+      })
+    })
+  },
+  // 获取标识信息
+  getStationInfo(context, payload) {
+    return new Promise((resolve, reject) => {
+      commodityAPI.getStationInfo(payload).then(data => {
         data ? resolve(data) : reject()
       })
     })

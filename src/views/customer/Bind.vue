@@ -29,6 +29,7 @@ export default {
   mounted() {
     let staff = this.$route.params.staff ? this.$route.params.staff : 0
     this.bindFlag({
+      s_id: this.$route.params.sid,
       order_no: this.$route.params.order,
       face_id: this.$route.params.face,
       staff_id: staff,

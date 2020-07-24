@@ -16,13 +16,11 @@ export default {
   },
   methods: {
     pictureChange(e) {
-      console.log(e)
       let file = WebIM.utils.getFileUrl(e.target)
       if (!file.filename) {
         this.$refs.imgDom.value = null
         return false
       }
-      console.log(file)
       var id = WebIM.conn.getUniqueId() // 生成本地消息id
       var msg = new WebIM.message('img', id) // 创建图片消息
       var allowType = {

@@ -20,7 +20,7 @@ const routes = [
     component: () => import(/* webpackChunkName: "order" */ '../views/customer/Order'),
   },
   {
-    path: '/bind/:order/:/face/:staff?',
+    path: '/bind/:sid/:order/:face/:staff?',
     name: 'Bind',
     component: () => import(/* webpackChunkName: "bind" */ '../views/customer/Bind'),
   },

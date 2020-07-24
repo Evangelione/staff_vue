@@ -133,7 +133,7 @@ export default {
 
   computed: {
     _height() {
-      return window.screen.availHeight - 46
+      return window.innerHeight - 46
     },
     _price() {
       let total = 0

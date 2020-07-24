@@ -26,7 +26,6 @@
                 />
               </template>
             </van-card>
-            <van-cell />
           </div>
           <van-empty description="暂无商品" v-if="retailList.length === 0"></van-empty>
         </van-index-bar>
@@ -53,7 +52,6 @@
                 />
               </template>
             </van-card>
-            <van-cell />
           </div>
           <van-empty description="暂无服务" v-if="serviceList.length === 0"></van-empty>
         </van-index-bar>
@@ -83,7 +81,6 @@
                 <div :key="index" v-for="(good, index) in i.detail">{{ good.name + ' x ' + good.goods_num }}</div>
               </template>
             </van-card>
-            <van-cell />
           </div>
           <van-empty description="暂无套餐" v-if="serviceList.length === 0"></van-empty>
         </van-index-bar>
@@ -130,7 +127,7 @@ export default {
 
   computed: {
     _height() {
-      return window.screen.availHeight - 46
+      return window.innerHeight - 130.8
     },
     _price() {
       let total = 0
@@ -272,10 +269,6 @@ export default {
 <style lang="less" scoped>
 .van-nav-bar--fixed {
   z-index: 999;
-}
-
-.van-index-bar {
-  padding-bottom: 80px;
 }
 
 /deep/.van-index-bar__sidebar {

@@ -2,7 +2,7 @@
   <div style="height: 100vh;">
     <van-nav-bar :border="false" @click-left="$goBack" fixed left-arrow title="开单收银" v-show="!status" />
     <div class="nav-bar-holder" v-show="!status"></div>
-    <div v-show="!status" class="search-bar-parent">
+    <div class="search-bar-parent" v-show="!status">
       <div class="search-bar">
         <van-row align="center" gutter="20" type="flex">
           <van-col span="22">
@@ -109,7 +109,14 @@
       />
     </van-popup>
     <van-popup position="bottom" safe-area-inset-bottom v-model="showMarkPicker">
-      <van-picker :columns="markColumns" @confirm="_pickMark" show-toolbar title="选择标识位" value-key="s_name" />
+      <van-picker
+        :columns="markColumns"
+        @cancel="showMarkPicker = false"
+        @confirm="_pickMark"
+        show-toolbar
+        title="选择标识位"
+        value-key="s_name"
+      />
     </van-popup>
     <van-popup
       class="operate-popup"
@@ -143,13 +150,18 @@
         />
       </div>
       <div style="margin: 18px 0 4px 0;">
-        <van-button size="small" type="danger">删除</van-button>
+        <van-button @click="_deleteGood" size="small" type="danger">删除</van-button>
         <van-button @click="_modifyGood" size="small" type="primary">确定</van-button>
       </div>
     </van-popup>
 
     <van-dialog class="QRCode" title="用户扫码支付" v-model="showPayQRCode">
       <img :src="qrcode" />
+    </van-dialog>
+
+    <!-- 取消原因 -->
+    <van-dialog @confirm="_confirmReason" show-cancel-button title="取消订单" v-model="showReason">
+      <van-field input-align="center" placeholder="请输入原因" v-model="reason" />
     </van-dialog>
   </div>
 </template>
@@ -177,6 +189,7 @@ export default {
       showMarkPicker: false,
       showOperatorPopup: false,
       showPayQRCode: false,
+      showReason: false,
       qrcode: '',
       searchTypeColumns: [
         {
@@ -200,6 +213,7 @@ export default {
       entryCount: 0,
       timer: null,
       curOperateOrder: {},
+      reason: '',
     }
   },
 
@@ -299,6 +313,71 @@ export default {
         })
       })
     },
+    _deleteGood() {
+      this.modifyGood({
+        id: this.curOperateOrder.id,
+        num: 0,
+        pay_price: this.curOperateOrder.pay_price,
+      })
+        .then(res => {
+          console.log(res)
+          if (res[0] === 'if_cancel') {
+            this.$dialog
+              .confirm({
+                title: '取消订单',
+                message: '确认取消当前订单？\n（服务将终止且订单无法恢复）',
+              })
+              .then(() => {
+                // on confirm
+                this.showReason = true
+              })
+              .catch(() => {
+                // on cancel
+              })
+          } else {
+            this.$toast.success({
+              message: '删除成功',
+              duration: 800,
+              onClose: () => {
+                this.getBillingOrder().then(res => {
+                  this.curOrder = res
+                })
+                this.showOperatorPopup = false
+              },
+            })
+          }
+        })
+        .catch(res => {
+          console.log(res)
+        })
+    },
+    // 确认取消备注信息
+    _confirmReason() {
+      if (this.reason) {
+        this.cancelOrder({
+          order_id: this.curOrder[0].order_id,
+          reason: this.reason,
+        }).then(() => {
+          debugger
+          this.$toast.success({
+            message: '取消成功',
+            duration: 800,
+            onClose: () => {
+              this.getBillingOrder().then(res => {
+                this.curOrder = res
+                this.reason = ''
+              })
+              this.showOperatorPopup = false
+            },
+          })
+        })
+      } else {
+        this.$toast({
+          message: '取消原因必填',
+          duration: 800,
+        })
+      }
+    },
     _changeOperateOrderNum(value) {
       this.curOperateOrder.pay_price = (value * this.curOperateOrder.unit_price).toFixed(2)
     },
@@ -391,12 +470,45 @@ export default {
     _getMarkList() {
       // 获取空闲标识，打开标识选择
       this.getFreeMarkList().then(res => {
-        this.markColumns = res
+        this.markColumns = res.map(item => {
+          let tag = '个人'
+          let status = '空闲'
+          if (item.tag === '2') {
+            tag = '多人'
+          } else if (item.tag === '3') {
+            tag = '公用'
+          }
+          if (item.status === 1) {
+            status = '使用中'
+          }
+          return {
+            ...item,
+            s_name: `${item.s_name}（${tag} - ${status}）`,
+            name: item.s_name,
+          }
+        })
         this.showMarkPicker = true
       })
     },
     // 选择标识且挂单
     _pickMark(data) {
+      if (data.status === 1) {
+        this.$dialog
+          .confirm({
+            title: '添加商品',
+            message: `${data.name}中已有订单，\n是否要将商品添加到 -> ${data.name}`,
+          })
+          .then(() => {
+            this._entry(data)
+          })
+          .catch(() => {
+            // on cancel
+          })
+      } else {
+        this._entry(data)
+      }
+    },
+    _entry(data) {
       let list = this.curOrder.map(item => {
         return {
           id: item.id,

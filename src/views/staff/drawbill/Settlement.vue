@@ -15,6 +15,7 @@
                     <span>{{ item.s_name }}</span>
                   </div>
                   <div class="desc">订单号：{{ item.order_no }}</div>
+                  <div class="desc">取消原因：{{ item.operate_staff_reason }}</div>
                 </van-col>
               </van-row>
             </div>

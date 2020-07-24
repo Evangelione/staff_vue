@@ -11,8 +11,8 @@
       <div style="padding: 5px 20px; background: #fff; font-size: 14px;">
         <div class="mark">
           <van-icon name="label-o" />
-          <span>订单标识：</span>
-          <span>{{ $route.params.flag }}</span>
+          <span>订单：</span>
+          <span>{{ flagName }}</span>
         </div>
         <!-- <van-divider />
         <div class="date">
@@ -186,6 +186,7 @@ export default {
       curPackageGood: '',
       recommendList: [],
       curRec: '',
+      flagName: '',
     }
   },
 
@@ -257,7 +258,9 @@ export default {
     },
   },
 
-  watch: {},
+  watch: {
+    $route: '_getUserOrder',
+  },
 
   created() {},
 
@@ -277,32 +280,41 @@ export default {
 
   methods: {
     ...mapActions(['getFlag', 'getStaff', 'commitOrder', 'getRecommendList', 'addToCart']),
-    ...mapActions('commodity', ['getUserOrder', 'settlementOrder']),
+    ...mapActions('commodity', ['getUserOrder', 'settlementOrder', 'getStationInfo']),
     _getUserOrder() {
-      this.loading = true
-      this.getUserOrder({ s_id: this.$route.params.flag }).then(res => {
-        this.loading = false
-        this.list = res
+      this.getStationInfo({ store_id: this.$route.params.id, s_id: this.$route.params.flag }).then(info => {
+        this.flagName = info.s_name
+        this.loading = true
+        this.getUserOrder({ s_id: this.$route.params.flag }).then(res => {
+          this.loading = false
 
-        let goodsSet = new Set()
-        let serviceSet = new Set()
-
-        res.forEach(item => {
-          if (item.type === '1') {
-            serviceSet.add(item.goods_appoint_id)
-          } else if (item.type === '2') {
-            goodsSet.add(item.goods_appoint_id)
-          } else if (item.type === '4') {
-            item.detail.forEach(item2 => {
-              if (item2.type === '1') {
-                serviceSet.add(item2.goods_appoint_id)
-              } else if (item2.type === '2') {
-                goodsSet.add(item2.goods_appoint_id)
-              }
-            })
+          if (res.action === 'go_back') {
+            this.$router.replace(`/order/${this.$route.params.id}/${res.s_id}`)
+            return
           }
+
+          this.list = res
+
+          let goodsSet = new Set()
+          let serviceSet = new Set()
+
+          res.forEach(item => {
+            if (item.type === '1') {
+              serviceSet.add(item.goods_appoint_id)
+            } else if (item.type === '2') {
+              goodsSet.add(item.goods_appoint_id)
+            } else if (item.type === '4') {
+              item.detail.forEach(item2 => {
+                if (item2.type === '1') {
+                  serviceSet.add(item2.goods_appoint_id)
+                } else if (item2.type === '2') {
+                  goodsSet.add(item2.goods_appoint_id)
+                }
+              })
+            }
+          })
+          this._getRecommendList(Array.from(goodsSet), Array.from(serviceSet))
         })
-        this._getRecommendList(Array.from(goodsSet), Array.from(serviceSet))
       })
     },
     _getRecommendList(goods, services) {
@@ -479,9 +491,7 @@ export default {
     },
     _onSubmit() {
       if (this._orderSubmitText === '结算') {
-        console.log('结算')
         this.settlementOrder({ order_id: this.list[0].order_id }).then(res => {
-          debugger
           window.location.href = res.url
         })
       } else {

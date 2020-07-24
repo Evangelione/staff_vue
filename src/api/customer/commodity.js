@@ -39,4 +39,11 @@ export default {
       ticket: localStorage.getItem('ticket'),
     })
   },
+  // 获取标识信息
+  getStationInfo: payload => {
+    return axios.post('/wap.php?g=Wap&c=ScanOrder&a=getStationInfo', {
+      ...payload,
+      ticket: localStorage.getItem('ticket'),
+    })
+  },
 }

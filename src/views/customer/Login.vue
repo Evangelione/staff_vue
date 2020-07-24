@@ -185,7 +185,6 @@ export default {
         })
         return
       }
-      console.log(this.$route)
       this.registerAcc({
         phone: this.phone,
         password: this.pwd,

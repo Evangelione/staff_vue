@@ -240,7 +240,23 @@ export default {
       this.curOrder = data
       // 获取空闲标识，打开标识选择
       this.getFreeMarkList().then(res => {
-        this.markColumns = res
+        this.markColumns = res.map(item => {
+          let tag = '个人'
+          let status = '空闲'
+          if (item.tag === '2') {
+            tag = '多人'
+          } else if (item.tag === '3') {
+            tag = '公用'
+          }
+          if (item.status === 1) {
+            status = '使用中'
+          }
+          return {
+            ...item,
+            s_name: `${item.s_name}（${tag} - ${status}）`,
+            name: item.s_name,
+          }
+        })
         this.showMarkPicker = true
       })
     },
@@ -250,25 +266,32 @@ export default {
       this.getFreeStaffList({
         id: data.goods_appoint_id,
       }).then(res => {
-        res = res.map(item => {
-          return {
-            ...item,
-            name: item.name + ` - ${item.technician_grade_name || '暂无等级'} （¥ ${item.service_fee}）`,
-          }
-        })
-        if (data.remark_service_personnel !== '0') {
-          const index = res.findIndex(item => {
-            if (item.id == data.remark_service_personnel) {
-              return item
+        if (res.length) {
+          res = res.map(item => {
+            return {
+              ...item,
+              name: item.name + ` - ${item.technician_grade_name || '暂无等级'} （¥ ${item.service_fee}）`,
             }
           })
-          if (index > -1) {
-            this.defaultStaffIndex = index
-            res[index].name = res[index].name + ' （用户指定）'
+          if (data.remark_service_personnel !== '0') {
+            const index = res.findIndex(item => {
+              if (item.id == data.remark_service_personnel) {
+                return item
+              }
+            })
+            if (index > -1) {
+              this.defaultStaffIndex = index
+              res[index].name = res[index].name + ' （用户指定）'
+            }
           }
+          this.staffColumns = res
+          this.showStaffPicker = true
+        } else {
+          this.$dialog.alert({
+            title: '提示',
+            message: '没有可指派的服务人员',
+          })
         }
-        this.staffColumns = res
-        this.showStaffPicker = true
       })
     },
     // 重新指定服务人员
@@ -278,6 +301,23 @@ export default {
     },
     // 修改标识
     _pickMark(data) {
+      if (data.status === 1) {
+        this.$dialog
+          .confirm({
+            title: '合并订单',
+            message: `${data.name}中已有订单，\n是否要将订单合并到 -> ${data.name}，\n合并后无法撤销！！！`,
+          })
+          .then(() => {
+            this._changeOrderMark(data)
+          })
+          .catch(() => {
+            // on cancel
+          })
+      } else {
+        this._changeOrderMark(data)
+      }
+    },
+    _changeOrderMark(data) {
       this.changeOrderMark({ s_id: data.id, order_id: this.curOrder.order_id }).then(() => {
         this.$toast.success({
           message: '修改成功',
@@ -508,6 +548,8 @@ export default {
             onClose: () => {
               this.getEntryOrderList().then(res => {
                 this.orderList = res
+                this.radio = ''
+                this.reason = ''
               })
             },
           })

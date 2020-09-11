@@ -10,7 +10,7 @@
             <van-index-anchor :index="item.sort_name" />
             <van-card
               :key="i.goods_id"
-              :num="i.stock_num == '-1' ? '∞' : i.stock_num"
+              :num="i.stock_num == '-1' ? '∞' : i.stock_num - i.num"
               :price="i.price"
               :thumb="i.pic_arr[0].url"
               :title="i.name"
@@ -22,7 +22,7 @@
                   @plus="_plus(2, i.goods_id, i.price, i.pic_arr[0].url, i.name)"
                   default-value="0"
                   disable-input
-                  min="0"
+                  :min="i.min"
                   v-model="i.num"
                 />
               </template>
@@ -153,6 +153,7 @@ export default {
     //   this.cart = localStorage.getItem('staffOrderCart') ? JSON.parse(localStorage.getItem('staffOrderCart')) : []
     // }
     // 读取商品列表 && 向购物车中添加已购买数据
+    // order_id: this.$route.params.orderId
     this.getRetailList({ staff_id: this.$route.params.id, order_id: this.$route.params.orderId }).then(res => {
       let list = []
       for (let i in res) {
@@ -175,6 +176,7 @@ export default {
       // 循环所有商品，找出num>1的商品并添加到购物车中
       list.forEach(item => {
         item.goods_list.forEach(i => {
+          i.min = i.num
           if (i.num > 0) {
             this.items[0].badge += i.num
             this.cart.push({
@@ -193,6 +195,7 @@ export default {
     })
 
     // 读取服务列表 && 向购物车中添加已购买数据
+    // order_id: this.$route.params.orderId
     this.getServiceList({ staff_id: this.$route.params.id, order_id: this.$route.params.orderId }).then(res => {
       let list = []
       for (let i in res) {
@@ -234,6 +237,7 @@ export default {
     })
 
     // 读取套餐列表 && 向购物车中添加已购买数据
+    // order_id: this.$route.params.orderId
     this.getPackageList({ staff_id: this.$route.params.id, order_id: this.$route.params.orderId }).then(res => {
       let list = []
       for (let i in res) {

@@ -133,7 +133,7 @@ export default {
     }),
   // 指派服务人员
   appointStaff: payload =>
-    axios.post('/appapi.php?c=Storestaff&a=new_send_orders', {
+    axios.post('/appapi.php?c=Storestaff&a=assign', {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
@@ -143,7 +143,7 @@ export default {
     }),
   // 撤下服务人员
   unDoStaff: payload =>
-    axios.post('/appapi.php?c=Storestaff&a=unassign', {
+    axios.post('/appapi.php?c=Storestaff&a=cancel_assign', {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
@@ -153,7 +153,7 @@ export default {
     }),
   // 追加服务人员
   addStaff: payload =>
-    axios.post('/appapi.php?c=Storestaff&a=appendAssignment', {
+    axios.post('/appapi.php?c=Storestaff&a=append_assign', {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
@@ -163,7 +163,7 @@ export default {
     }),
   // 替服务人员接单
   insteadOrders: payload =>
-    axios.post('/appapi.php?c=Storestaff&a=staff_receive_service', {
+    axios.post('/appapi.php?c=Storestaff&a=staff_help_receive', {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
@@ -173,7 +173,7 @@ export default {
     }),
   // 替服务人员完成
   insteadFinish: payload =>
-    axios.post('/appapi.php?c=Storestaff&a=staff_finsh_service', {
+    axios.post('/appapi.php?c=Storestaff&a=staff_help_finish', {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
@@ -183,7 +183,7 @@ export default {
     }),
   // 服务返工
   rework: payload =>
-    axios.post('/appapi.php?c=Storestaff&a=restart_service', {
+    axios.post('/appapi.php?c=Storestaff&a=rework', {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,
@@ -193,7 +193,7 @@ export default {
     }),
   // 验收合格
   acceptance: payload =>
-    axios.post('/appapi.php?c=Storestaff&a=confirm_service', {
+    axios.post('/appapi.php?c=Storestaff&a=acceptance', {
       ...payload,
       'Device-Id': 'packapp',
       app_version: 85,

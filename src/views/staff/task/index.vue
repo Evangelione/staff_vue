@@ -4,7 +4,7 @@
 
 <script>
 export default {
-  name: 'MessageIndex',
+  name: 'TaskIndex',
   mixins: [],
 
   components: {},

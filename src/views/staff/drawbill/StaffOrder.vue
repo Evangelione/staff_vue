@@ -36,6 +36,35 @@
           <van-col offset="1" span="4">x {{ item.num || item.goods_num }}</van-col>
           <van-col span="5" style="color: #e93e14;">¥ {{ item.pay_price }}</van-col>
         </van-row>
+        <div v-if="item.type != '4'">
+          <div
+            :key="index2"
+            style="margin-top: 4px; text-align:right; margin-right: 20px;"
+            v-for="(item2, index2) in item.supply"
+          >
+            {{ item2.name }} - {{ item2.grade_name }} - ¥ {{ item2.service_fee }}
+          </div>
+        </div>
+        <div v-else>
+          <van-row
+            :key="index2"
+            align="center"
+            justify="center"
+            style="margin-top: 4px; text-align:right; margin-right: 20px;"
+            type="flex"
+            v-for="(item2, index2) in item.detail"
+          >
+            <van-col span="9">{{ item2.name }}：</van-col>
+            <van-col span="15">
+              <div v-if="item2.supply">
+                <div :key="index3" v-for="(item3, index3) in item2.supply">
+                  {{ item3.name }} - {{ item3.grade_name }} - ¥ {{ item3.service_fee }}
+                </div>
+              </div>
+              <div v-else>暂未指定服务人员</div>
+            </van-col>
+          </van-row>
+        </div>
       </div>
       <transition name="fade">
         <div class="shortcut-bar" v-if="!expand">
@@ -92,7 +121,7 @@
             <van-image :src="_listPic(item)" height="20vw" width="20vw" />
           </van-col>
           <van-col span="8">{{ item.appoint_name || item.name }}</van-col>
-          <van-col span="8" style="color: #e93e14;">¥ {{ item.old_price || item.price }}</van-col>
+          <van-col span="8" style="color: #e93e14;">¥ {{ item.price || item.old_price }}</van-col>
         </van-row>
       </div>
       <div v-if="searchResult.length === 0">
@@ -120,7 +149,7 @@
     </van-popup>
     <van-popup
       class="operate-popup"
-      close-on-click-overlay="false"
+      :close-on-click-overlay="false"
       closeable
       style="width: 90vw;"
       v-model="showOperatorPopup"
@@ -228,7 +257,22 @@ export default {
     _totalPrice() {
       let total = 0
       this.curOrder.forEach(item => {
-        total += (item.unit_price || item.price) * 100 * (item.goods_num || item.num)
+        total += item.pay_price * 100 * (item.goods_num || item.num)
+        if (item.type != '4') {
+          if (item.supply) {
+            item.supply.forEach(ii => {
+              total += ii.service_fee * 100
+            })
+          }
+        } else {
+          item.detail.forEach(item2 => {
+            if (item2.supply) {
+              item2.supply.forEach(ii => {
+                total += ii.service_fee * 100
+              })
+            }
+          })
+        }
       })
       return total
     },
@@ -509,13 +553,7 @@ export default {
       }
     },
     _entry(data) {
-      let list = this.curOrder.map(item => {
-        return {
-          id: item.id,
-          pay_price: item.pay_price,
-        }
-      })
-      this.entryOrder({ s_id: data.id, list: list, order_id: this.curOrder[0].order_id }).then(() => {
+      this.entryOrder({ s_id: data.id, order_id: this.curOrder[0].order_id }).then(() => {
         this.$toast.success({
           message: '挂单成功',
           duration: 800,
@@ -597,6 +635,7 @@ export default {
 .search-bar-parent {
   z-index: 99;
   margin-top: -5px;
+  padding-bottom: 55px;
 }
 
 .search-bar {

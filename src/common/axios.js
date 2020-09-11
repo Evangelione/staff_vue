@@ -58,7 +58,7 @@ axios.interceptors.response.use(
               localStorage.removeItem('ticket')
               if (route.path.indexOf('order') > -1) {
                 router.push({ name: 'Login', params: route.params })
-              } else if (route.path.indexOf('staffOrder') > -1) {
+              } else if (route.path.indexOf('staff') > -1) {
                 window.location.href = 'http://www.9youke.com/packapp/storestaff/login.html'
               } else {
                 router.push({ name: 'Login', params: route.params })
@@ -71,6 +71,9 @@ axios.interceptors.response.use(
       if (config.data.errorCode == errorcode.WX) {
         window.location.href = config.data.result.referer
         return false
+      }
+      if (config.data.code === 0) {
+        return config.data.data
       }
       // 是否非法操作
       if (!config.data.errorCode) {

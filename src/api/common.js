@@ -57,4 +57,8 @@ export default {
       ...payload,
       ticket: localStorage.getItem('ticket'),
     }),
+  // 连接
+  // connWs: (sid, uid) => axios.get(`http://127.0.0.1:8906/ws/conn/${sid}/${uid}`),
+  // 通知ws
+  notificationWs: (sid, uid) => axios.get(`http://127.0.0.1:8906/ws/update/${sid}/${uid}`),
 }

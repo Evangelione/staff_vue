@@ -10,7 +10,7 @@
             <van-index-anchor :index="item.sort_name" />
             <van-card
               :key="i.goods_id"
-              :num="i.stock_num === '-1' ? '∞' : i.stock_num"
+              :num="i.stock_num === '-1' ? '∞' : i.stock_num - i.num"
               :price="i.price"
               :thumb="i.pic_arr[0].url"
               :title="i.name"
@@ -18,10 +18,10 @@
             >
               <template #footer>
                 <van-stepper
+                  :min="i.min"
                   @minus="_minus(2, i.goods_id)"
                   @plus="_plus(2, i.goods_id, i.price)"
                   disable-input
-                  min="0"
                   v-model="i.num"
                 />
               </template>
@@ -44,10 +44,10 @@
             >
               <template #footer>
                 <van-stepper
+                  :min="i.min"
                   @minus="_minus(1, i.appoint_id)"
                   @plus="_plus(1, i.appoint_id, i.old_price)"
                   disable-input
-                  min="0"
                   v-model="i.num"
                 />
               </template>
@@ -70,10 +70,10 @@
             >
               <template #footer>
                 <van-stepper
+                  :min="i.min"
                   @minus="_minus(4, i.package_id)"
                   @plus="_plus(4, i.package_id, i.price)"
                   disable-input
-                  min="0"
                   v-model="i.num"
                 />
               </template>
@@ -87,13 +87,7 @@
       </template>
     </van-tree-select>
 
-    <van-submit-bar
-      :price="_price"
-      @submit="_onSubmit"
-      button-text="确认选择"
-      tip="选择的商品将会您的加入购物车"
-      tip-icon="info-o"
-    />
+    <van-submit-bar :price="_price" @submit="_onSubmit" button-text="确认选择" tip="选择的商品将会加入购物车" tip-icon="info-o" />
   </div>
 </template>
 
@@ -144,7 +138,7 @@ export default {
 
   mounted() {
     // 读取商品列表 && 向购物车中添加已购买数据
-    this.getRetailList({ store_id: this.$route.params.id, s_id: this.$route.params.flag }).then(res => {
+    this.getRetailList({ store_id: this.$route.params.id, order_id: this.$route.params.order }).then(res => {
       let list = []
       for (let i in res) {
         list.push(res[i])
@@ -153,6 +147,7 @@ export default {
       // 循环所有商品，找出num>1的商品并添加到购物车中
       list.forEach(item => {
         item.goods_list.forEach(i => {
+          i.min = i.num
           if (i.num > 0) {
             this.items[0].badge += i.num
             this.cart.push({ id: i.goods_id, num: i.num, type: 2, price: i.price })
@@ -163,7 +158,7 @@ export default {
     })
 
     // 读取服务列表 && 向购物车中添加已购买数据
-    this.getServiceList({ store_id: this.$route.params.id, s_id: this.$route.params.flag }).then(res => {
+    this.getServiceList({ store_id: this.$route.params.id, order_id: this.$route.params.order }).then(res => {
       let list = []
       for (let i in res) {
         list.push(res[i])
@@ -172,6 +167,7 @@ export default {
       // 循环所有服务，找出num>1的商品并添加到购物车中
       list.forEach(item => {
         item.goods_list.forEach(i => {
+          i.min = i.num
           if (i.num > 0) {
             this.items[1].badge += i.num
             this.cart.push({ id: i.appoint_id, num: i.num, type: 1, price: i.old_price })
@@ -179,10 +175,11 @@ export default {
         })
       })
       this.serviceList = list
+      console.log(list)
     })
 
     // 读取套餐列表 && 向购物车中添加已购买数据
-    this.getPackageList({ store_id: this.$route.params.id, s_id: this.$route.params.flag }).then(res => {
+    this.getPackageList({ store_id: this.$route.params.id, order_id: this.$route.params.order }).then(res => {
       let list = []
       for (let i in res) {
         list.push(res[i])
@@ -191,6 +188,7 @@ export default {
       // 循环所有套餐，找出num>1的商品并添加到购物车中
       list.forEach(item => {
         item.goods_list.forEach(i => {
+          i.min = i.num
           if (i.num > 0) {
             this.items[2].badge += i.num
             this.cart.push({ id: i.package_id, num: i.num, type: 4, price: i.price })
@@ -204,6 +202,7 @@ export default {
   destroyed() {},
 
   methods: {
+    ...mapActions(['notificationWs']),
     ...mapActions('commodity', ['getRetailList', 'getServiceList', 'getPackageList', 'addOrder']),
     _minus(type, id) {
       const index = this.cart.findIndex(item => {
@@ -260,6 +259,10 @@ export default {
             this.$router.replace({ path: `/order/${this.$route.params.id}/${this.$route.params.flag}` })
           },
         })
+        this.notificationWs({
+          sid: this.$route.params.flag,
+          uid: this.$route.params.uid,
+        }).catch(() => {})
       })
     },
   },

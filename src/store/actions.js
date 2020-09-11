@@ -89,4 +89,20 @@ export default {
       })
     })
   },
+  // 连接ws
+  // connWs(context, { sid, uid }) {
+  //   return new Promise((resolve, reject) => {
+  //     commonAPI.connWs(sid, uid).then(data => {
+  //       data ? resolve(data) : reject()
+  //     })
+  //   })
+  // },
+  // 通知ws
+  notificationWs(context, { sid, uid }) {
+    return new Promise((resolve, reject) => {
+      commonAPI.notificationWs(sid, uid).then(data => {
+        data ? resolve(data) : reject()
+      })
+    })
+  },
 }

@@ -38,9 +38,9 @@
         v-model="sms"
       >
         <template #button>
-          <van-button :disabled="timer" @click="_getSms" size="small" type="primary">{{
-            timer ? time : '发送验证码'
-          }}</van-button>
+          <van-button :disabled="timer" @click="_getSms" size="small" type="primary">
+            {{ timer ? time : '发送验证码' }}
+          </van-button>
         </template>
       </van-field>
       <van-field

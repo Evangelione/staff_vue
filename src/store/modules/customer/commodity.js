@@ -90,10 +90,18 @@ const actions = {
       })
     })
   },
-  // 获取标识信息
-  getStationInfo(context, payload) {
+  // 指定店员
+  remStaff(context, payload) {
     return new Promise((resolve, reject) => {
-      commodityAPI.getStationInfo(payload).then(data => {
+      commodityAPI.remStaff(payload).then(data => {
+        data ? resolve(data) : reject()
+      })
+    })
+  },
+  // 修改商品数量
+  modifyGood(context, payload) {
+    return new Promise((resolve, reject) => {
+      commodityAPI.modifyGood(payload).then(data => {
         data ? resolve(data) : reject()
       })
     })

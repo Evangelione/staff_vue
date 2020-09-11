@@ -1,11 +1,6 @@
 <template>
   <div class="container">
-    <van-nav-bar
-      :right-text="_rightText"
-      @click-right="$router.push(`/commodity/${$route.params.id}/${$route.params.flag}`)"
-      fixed
-      title="购物车"
-    />
+    <van-nav-bar :right-text="_rightText" @click-right="goOrder" fixed title="点单" />
     <div class="nav-bar-holder"></div>
     <van-sticky :offset-top="46">
       <div style="padding: 5px 20px; background: #fff; font-size: 14px;">
@@ -28,16 +23,17 @@
         </div>-->
       </div>
     </van-sticky>
-    <van-loading type="spinner" v-if="loading" />
+    <van-loading type="spinner" v-if="loading && !list.length" />
     <div style="background: #fff; margin-top: 10px;">
       <van-card
         :class="item.status !== '0' ? 'green' : ''"
         :key="index"
         :num="item.goods_num"
-        :price="item.unit_price"
+        :price="item.pay_price"
         :tag="item.status === '0' ? '未下单' : '已下单'"
         :thumb="item.goods_img"
         :title="item.name"
+        @click="_openEditor(item)"
         v-for="(item, index) in list"
       >
         <template #tags>
@@ -46,41 +42,57 @@
         <template #footer>
           <span
             style="padding: 4px 0;"
-            v-if="item.need_service_personnel === '1' && item.remark_service_personnel !== '0' && item.type !== '4'"
-            >指定：{{ _getStaffInfo(item) }}</span
+            v-if="
+              item.need_service_personnel === '1' &&
+                item.remark_service_personnel !== '0' &&
+                item.type !== '4' &&
+                !item.supply
+            "
           >
+            指定：{{ _getStaffInfo(item) }}
+          </span>
+          <span style="padding: 4px 0;" v-else>
+            <div :key="i" v-for="(staff, i) in item.supply">
+              {{ staff.name }} - {{ staff.grade_name }} （¥{{ staff.service_fee }}）
+            </div>
+          </span>
           <van-button
-            @click="_controlStaffPicker(index, item)"
+            @click.stop="_controlStaffPicker(index, item)"
             size="small"
             style="margin-top: 20px"
             v-if="item.type != '2' && item.status == '0' && item.need_service_personnel === '1'"
-            >指定服务人员</van-button
           >
+            指定服务人员
+          </van-button>
 
-          <van-collapse v-if="item.type === '4'" v-model="activeNames">
-            <van-collapse-item :name="item.id" title="套餐包含内容">
-              <div :key="index2" style="margin-top: 3px;" v-for="(i, index2) in item.detail">
-                <div style="display: flex;justify-content: space-between; align-items: center;">
-                  <span>{{ i.name }} x1</span>
-
-                  <van-button
-                    @click="_controlPackageStaffPicker(index, index2, i)"
-                    size="mini"
-                    style="margin-left: 40px;padding: 0 4px;"
-                    v-if="i.type != '2' && i.status == '0' && i.need_service_personnel === '1'"
-                    >指定服务人员</van-button
-                  >
-                </div>
-                <div style="text-align: left;">
-                  <span
-                    class="package-staff"
-                    v-if="i.need_service_personnel === '1' && i.remark_service_personnel !== '0'"
-                    >指定：{{ _getStaffInfo(i) }}</span
-                  >
-                </div>
+          <div style="margin-top: 15px;" v-if="item.type === '4'">
+            <div :key="index2" style="margin-top: 3px;" v-for="(i, index2) in item.detail">
+              <div style="display: flex;justify-content: space-between; align-items: center;">
+                <span>{{ i.name }} x1</span>
+                <van-button
+                  @click.stop="_controlPackageStaffPicker(index, index2, i)"
+                  size="mini"
+                  style="margin-left: 40px;padding: 0 4px;"
+                  v-if="i.type != '2' && i.status == '0' && i.need_service_personnel === '1'"
+                >
+                  指定服务人员
+                </van-button>
               </div>
-            </van-collapse-item>
-          </van-collapse>
+              <div style="text-align: left;">
+                <span
+                  class="package-staff"
+                  v-if="i.need_service_personnel === '1' && i.remark_service_personnel !== '0' && !i.supply"
+                >
+                  指定：{{ _getStaffInfo(i) }}
+                </span>
+                <span style="padding: 4px 0;" v-else>
+                  <div :key="id" class="sup-real" v-for="(staff, id) in i.supply">
+                    {{ staff.name }} - {{ staff.grade_name }} （¥{{ staff.service_fee }}）
+                  </div>
+                </span>
+              </div>
+            </div>
+          </div>
         </template>
       </van-card>
     </div>
@@ -109,7 +121,7 @@
       :disabled="_canSubmit"
       :price="_price"
       :tip="_showTip"
-      @submit="_onSubmit"
+      @submit="perCheck"
       v-else
     />
     <van-popup position="bottom" safe-area-inset-bottom v-model="showFlagPicker">
@@ -118,7 +130,7 @@
         @cancel="_controlFlagPicker"
         @confirm="_pickFlag"
         show-toolbar
-        title="选择桌台 / 座位"
+        title="请选择桌台 / 座位"
         value-key="s_name"
       ></van-picker>
     </van-popup>
@@ -154,6 +166,23 @@
         <van-button @click="_addToCart" size="small" type="primary">加入购物车</van-button>
       </div>
     </van-popup>
+
+    <van-popup :style="{ width: '90vw' }" round safe-area-inset-bottom v-model="showEditPopup">
+      <van-image :src="curEdit.goods_img" height="90vw" width="100%" />
+      <div class="title">{{ curEdit.name }}</div>
+      <div class="price-box">
+        <div class="price">¥ {{ curEdit.pay_price }}</div>
+        <van-stepper v-if="curEdit.type == '2'" v-model="curEdit.num" />
+      </div>
+      <div class="opa">
+        <van-button @click="_deleteCommodity" size="small" style="margin-right: 4px;" type="primary">
+          删除商品
+        </van-button>
+        <van-button @click="_modifyCommodity" size="small" type="primary" v-if="curEdit.type == '2'">
+          确认修改
+        </van-button>
+      </div>
+    </van-popup>
   </div>
 </template>
 
@@ -173,11 +202,11 @@ export default {
     return {
       loading: false,
       list: [],
-      activeNames: [],
       showFlagPicker: false,
       showStaffPicker: false,
       showPackageStaffPicker: false,
       showRecommendPopup: false,
+      showEditPopup: false,
       flagColumns: [],
       staffColumns: [],
       site: '',
@@ -186,7 +215,9 @@ export default {
       curPackageGood: '',
       recommendList: [],
       curRec: '',
+      curEdit: '',
       flagName: '',
+      station: {},
     }
   },
 
@@ -194,17 +225,26 @@ export default {
     _price() {
       let total = 0
       this.list.forEach(item => {
-        total += item.unit_price * 100 * item.goods_num
-        if (
-          item.type == '1' &&
-          item.need_service_personnel == '1' &&
-          item.remark_service_personnel != '0' &&
-          item.remark_service_personnel_price
-        ) {
-          total += item.remark_service_personnel_price * 100
+        total += item.pay_price * 100 * item.goods_num
+        if (item.type == '1') {
+          if (item.supply) {
+            item.supply.forEach(ii => {
+              total += ii.service_fee * 100
+            })
+          } else if (
+            item.need_service_personnel == '1' &&
+            item.remark_service_personnel != '0' &&
+            item.remark_service_personnel_price
+          ) {
+            total += item.remark_service_personnel_price * 100
+          }
         } else if (item.type == '4') {
           item.detail.forEach(i => {
-            if (
+            if (i.supply) {
+              i.supply.forEach(ii => {
+                total += ii.service_fee * 100
+              })
+            } else if (
               i.type == '1' &&
               i.need_service_personnel == '1' &&
               i.remark_service_personnel != '0' &&
@@ -276,45 +316,141 @@ export default {
     })
   },
 
-  destroyed() {},
+  destroyed() {
+    this.ws.close()
+  },
 
   methods: {
-    ...mapActions(['getFlag', 'getStaff', 'commitOrder', 'getRecommendList', 'addToCart']),
-    ...mapActions('commodity', ['getUserOrder', 'settlementOrder', 'getStationInfo']),
+    ...mapActions(['getFlag', 'getStaff', 'commitOrder', 'getRecommendList', 'addToCart', 'connWs', 'notificationWs']),
+    ...mapActions('commodity', ['getUserOrder', 'settlementOrder', 'remStaff', 'modifyGood']),
+    _openWs(res) {
+      if (res.info.s_tag !== '2') {
+        return
+      }
+      var ws = new WebSocket(`ws://192.168.110.174:8906/ws/conn/${res.info.s_id}/${res.info.uid}`)
+      //连接打开时触发
+      ws.onopen = function() {
+        console.log('Connection open ...')
+        // ws.send("Hello WebSockets!");
+        // ws.send("ping")
+      }
+      //接收到消息时触发
+      ws.onmessage = evt => {
+        console.log('Received Message: ' + evt.data)
+        console.log()
+        const data = JSON.parse(evt.data)
+        if (data.action === 'update') {
+          this._getUserOrder()
+        }
+        // if (typeof evt.data === 'object') {
+        // const link = document.createElement('a')
+        // link.href = window.URL.createObjectURL(evt.data)
+        // link.download = 'file'
+        // link.click()
+        // }
+      }
+      //连接关闭时触发
+      ws.onclose = function() {
+        console.log('Connection closed.')
+      }
+      this.ws = ws
+    },
     _getUserOrder() {
-      this.getStationInfo({ store_id: this.$route.params.id, s_id: this.$route.params.flag }).then(info => {
-        this.flagName = info.s_name
-        this.loading = true
-        this.getUserOrder({ s_id: this.$route.params.flag }).then(res => {
-          this.loading = false
+      this.loading = true
+      this.getUserOrder({ s_id: this.$route.params.flag }).then(res => {
+        if (res.action === 'go_back') {
+          this.$router.replace(`/order/${this.$route.params.id}/${res.s_id}`)
+          return
+        }
+        if (!this.ws) this._openWs(res)
 
-          if (res.action === 'go_back') {
-            this.$router.replace(`/order/${this.$route.params.id}/${res.s_id}`)
-            return
+        this.flagName = res.info.s_name
+        document.title = res.info.s_name
+        this.loading = false
+
+        this.list = res.list
+        this.station = res.info
+
+        let goodsSet = new Set()
+        let serviceSet = new Set()
+
+        res.list.forEach(item => {
+          if (item.type === '1') {
+            serviceSet.add(item.goods_appoint_id)
+          } else if (item.type === '2') {
+            goodsSet.add(item.goods_appoint_id)
+          } else if (item.type === '4') {
+            item.detail.forEach(item2 => {
+              if (item2.type === '1') {
+                serviceSet.add(item2.goods_appoint_id)
+              } else if (item2.type === '2') {
+                goodsSet.add(item2.goods_appoint_id)
+              }
+            })
           }
-
-          this.list = res
-
-          let goodsSet = new Set()
-          let serviceSet = new Set()
-
-          res.forEach(item => {
-            if (item.type === '1') {
-              serviceSet.add(item.goods_appoint_id)
-            } else if (item.type === '2') {
-              goodsSet.add(item.goods_appoint_id)
-            } else if (item.type === '4') {
-              item.detail.forEach(item2 => {
-                if (item2.type === '1') {
-                  serviceSet.add(item2.goods_appoint_id)
-                } else if (item2.type === '2') {
-                  goodsSet.add(item2.goods_appoint_id)
-                }
-              })
-            }
-          })
-          this._getRecommendList(Array.from(goodsSet), Array.from(serviceSet))
         })
+        this._getRecommendList(Array.from(goodsSet), Array.from(serviceSet))
+      })
+    },
+    goOrder() {
+      if (this.list.length) {
+        this.$router.push(
+          `/commodity/${this.$route.params.id}/${this.$route.params.flag}/${this.station.uid}/${this.list[0].order_id}`
+        )
+      } else {
+        this.$router.push(`/commodity/${this.$route.params.id}/${this.$route.params.flag}/${this.station.uid}`)
+      }
+    },
+    _openEditor(item) {
+      this.curEdit = item
+      this.curEdit.num = item.goods_num
+      console.log(item)
+      if (item.status != '0') {
+        this.$toast('商品已提交，不能修改')
+        return
+      }
+      this.showEditPopup = true
+    },
+    _deleteCommodity() {
+      this.modifyGood({
+        id: this.curEdit.id,
+        num: 0,
+      }).then(() => {
+        this.$toast({
+          message: '删除成功',
+          duration: 800,
+          onClose: () => {
+            this._getUserOrder()
+            this.showEditPopup = false
+          },
+        })
+        if (this.station.s_tag == '2') {
+          this.notificationWs({
+            sid: this.station.s_id,
+            uid: this.station.uid,
+          }).catch(() => {})
+        }
+      })
+    },
+    _modifyCommodity() {
+      this.modifyGood({
+        id: this.curEdit.id,
+        num: this.curEdit.num,
+      }).then(() => {
+        this.$toast({
+          message: '修改成功',
+          duration: 800,
+          onClose: () => {
+            this._getUserOrder()
+            this.showEditPopup = false
+          },
+        })
+        if (this.station.s_tag == '2') {
+          this.notificationWs({
+            sid: this.station.s_id,
+            uid: this.station.uid,
+          }).catch(() => {})
+        }
       })
     },
     _getRecommendList(goods, services) {
@@ -429,8 +565,23 @@ export default {
       this.site = data.id
       this.site_name = data.s_name
       this._controlFlagPicker()
+      this._onSubmit()
     },
     _pickStaff(data) {
+      console.log(data)
+      console.log(this.curGood)
+      this.remStaff({ id: this.list[this.curGood].id, order_id: this.list[0].order_id, staff_id: data.id }).then(
+        res => {
+          console.log(this)
+          if (this.station.s_tag == '2') {
+            this.notificationWs({
+              sid: this.station.s_id,
+              uid: this.station.uid,
+            }).catch(() => {})
+          }
+          console.log(res)
+        }
+      )
       this.list[this.curGood].remark_service_personnel = data.id
       this.list[this.curGood].remark_service_personnel_name = data.name
       this.list[this.curGood].remark_service_personnel_level = data.technician_grade_name
@@ -439,6 +590,19 @@ export default {
       this._controlStaffPicker()
     },
     _pickPackageStaff(data) {
+      this.remStaff({
+        id: this.list[this.curGood].detail[this.curPackageGood].id,
+        order_id: this.list[0].order_id,
+        staff_id: data.id,
+      }).then(res => {
+        if (this.station.s_tag == '2') {
+          this.notificationWs({
+            sid: this.station.s_id,
+            uid: this.station.uid,
+          }).catch(() => {})
+        }
+        console.log(res)
+      })
       this.list[this.curGood].detail[this.curPackageGood].remark_service_personnel = data.id
       this.list[this.curGood].detail[this.curPackageGood].remark_service_personnel_name = data.name
       this.list[this.curGood].detail[this.curPackageGood].remark_service_personnel_level = data.technician_grade_name
@@ -489,47 +653,66 @@ export default {
     _getStaffInfo(item) {
       return `${item.remark_service_personnel_name} - ${item.remark_service_personnel_level} （ ¥ ${item.remark_service_personnel_price}）`
     },
+    perCheck() {
+      let need = false
+      if (this.station.order_rem.length == 0) {
+        this.list.forEach(item => {
+          if (item.type == 1 && item.need_table == 1) {
+            need = true
+          } else if (item.type == 4) {
+            item.detail.forEach(item2 => {
+              if (item2.need_table == 1) {
+                need = true
+              }
+            })
+          }
+        })
+      }
+      if (this.station.s_tag == '1' || this.station.s_tag == '2') {
+        need = false
+      }
+      if (!need) {
+        this._onSubmit()
+      } else {
+        this._openFlagPicker()
+      }
+    },
     _onSubmit() {
       if (this._orderSubmitText === '结算') {
         this.settlementOrder({ order_id: this.list[0].order_id }).then(res => {
           window.location.href = res.url
         })
       } else {
-        let result = {}
         let isFirst = true
         this.list.forEach(item => {
-          if (item.status === '0') {
-            if (item.type === '4') {
-              item.detail.forEach(i => {
-                if (i.remark_service_personnel !== '0') {
-                  result[i.id] = i.remark_service_personnel
-                }
-              })
-            } else {
-              if (item.remark_service_personnel !== '0') {
-                result[item.id] = item.remark_service_personnel
-              }
-            }
-          } else {
+          if (item.status !== '0') {
             isFirst = false
           }
         })
-        this.commitOrder({ order: result, s_user_id: this.$route.params.flag, order_id: this.list[0].order_id }).then(
-          () => {
-            this.$toast.success({
-              message: '订单已提交',
-              duration: 800,
-              onClose: () => {
-                this._getUserOrder()
-              },
-            })
-            this.list = []
-            this.recommendList = []
-            this.pushStaff({ isFirst }).then(res => {
-              console.log(res)
-            })
+        let par = { s_user_id: this.$route.params.flag, order_id: this.list[0].order_id }
+        if (this.site) {
+          par.s_id = this.site
+        }
+        this.commitOrder(par).then(() => {
+          this.$toast.success({
+            message: '订单已提交',
+            duration: 800,
+            onClose: () => {
+              this._getUserOrder()
+            },
+          })
+          this.list = []
+          this.recommendList = []
+          if (this.station.s_tag == '2') {
+            this.notificationWs({
+              sid: this.station.s_id,
+              uid: this.station.uid,
+            }).catch(() => {})
           }
-        )
+          this.pushStaff({ isFirst }).then(res => {
+            console.log(res)
+          })
+        })
       }
       // if (this.site_name === '') {
       //   this.$toast({
@@ -630,5 +813,10 @@ export default {
 
 .van-card__footer {
   margin-top: 8px;
+}
+
+.sup-real {
+  font-size: 10px;
+  color: #777;
 }
 </style>

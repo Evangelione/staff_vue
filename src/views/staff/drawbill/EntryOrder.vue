@@ -2,121 +2,111 @@
   <div>
     <van-nav-bar :border="false" @click-left="$goBack" fixed left-arrow title="挂单中订单" />
     <div class="nav-bar-holder-sp"></div>
-    <van-radio-group v-model="radio">
-      <div :key="index" v-for="(item, index) in orderList">
-        <van-panel>
-          <div class="van-hairline--bottom" slot="header">
-            <van-row class="header">
-              <van-col span="18">
-                <div class="title">
-                  <van-icon name="label-o" />
-                  <span>{{ item.s_name }}</span>
-                  <van-button @click="_getMarkList(item)" size="mini" type="warning">修改标识</van-button>
-                </div>
-                <div class="desc">订单号：{{ item.order_no }}</div>
-              </van-col>
-              <van-col span="6">
-                <div class="status">
-                  <van-radio :name="item.order_id"></van-radio>
-                </div>
-              </van-col>
-            </van-row>
+    <van-collapse accordion v-model="active">
+      <van-collapse-item :key="index" :label="item.order_no" :name="item.order_id" v-for="(item, index) in orderList">
+        <template #title>
+          <div v-if="item.user_phone">
+            {{ item.s_name || '未知标识' }} -
+            <a class="tel" :href="`tel:${item.user_phone}`" @click.stop="() => {}">
+              <van-icon name="phone-o" />
+              {{ item.user_phone }}
+            </a>
           </div>
-          <div>
-            <div :key="index2" v-for="(item2, index2) in item.list">
-              <van-row :class="item2.type !== '4' ? 'detail' : 'detail has-border-top'" align="center" type="flex">
-                <van-col class="van-ellipsis" span="6">{{ item2.name }}</van-col>
-                <van-col class="price van-ellipsis" offset="1" span="5">
-                  <div>x {{ item2.goods_num }}</div>
-                  <div style="margin-top: 3px;">¥ {{ item2.unit_price }}</div>
-                </van-col>
-                <van-col span="12" style="display: flex;justify-content: flex-end;">
-                  <div v-if="item2.type === '1'">
-                    <div v-if="item2.service_status === '1'">服务完成</div>
-                    <div v-if="item2.service_status === '2'">
-                      <div v-if="item2.sent == '0'">
-                        <van-button @click="_getStaffList(item2)" size="mini">指派服务</van-button>
-                      </div>
-                      <div v-else>
-                        <van-button @click="_rePickStaff(item2)" size="mini" style="margin-right: 4px;"
-                          >修改指派</van-button
-                        >
-                        <van-button @click="_orders(item2)" size="mini">接单</van-button>
-                      </div>
-                    </div>
-                    <div v-if="item2.service_status === '3'">
-                      <div v-if="item2.supply.length > 0">
-                        <van-button @click="_rePickStaff(item2)" size="mini">修改指派</van-button>
-                        <van-button @click="_finish(item2)" size="mini">服务完成</van-button>
-                      </div>
-                      <div v-else>
-                        <van-button @click="_getStaffList(item2)" size="mini">指派服务</van-button>
-                      </div>
-                    </div>
-                    <div v-if="item2.service_status === '4'">
-                      <van-button @click="_rework(item2)" size="mini">返工</van-button>
-                      <van-button @click="_acceptance(item2)" size="mini">验收合格</van-button>
-                    </div>
-                    <div v-if="item2.service_status === '5'">待重新服务</div>
-                  </div>
-                  <div v-if="item2.type === '4'">套餐</div>
-                </van-col>
-              </van-row>
-              <!-- 套餐显示包含内容 -->
-              <div class="has-border-bottom" v-if="item2.type === '4'">
-                <van-row
-                  :key="index3"
-                  align="center"
-                  class="detail"
-                  type="flex"
-                  v-for="(item3, index3) in item2.detail"
-                >
-                  <van-col class="van-ellipsis" span="6">{{ item3.name }}</van-col>
-                  <van-col class="price van-ellipsis" offset="1" span="5">
-                    <div>x {{ item3.goods_num }}</div>
-                  </van-col>
-                  <van-col span="12" style="display: flex;justify-content: flex-end;">
-                    <div v-if="item3.type === '1'">
-                      <div v-if="item3.service_status === '1'">服务完成</div>
-                      <div v-if="item3.service_status === '2'">
-                        <div v-if="item3.sent == '0'">
-                          <van-button @click="_getStaffList(item3)" size="mini">指派服务</van-button>
-                        </div>
-                        <div v-else>
-                          <van-button @click="_rePickStaff(item3)" size="mini" style="margin-right: 4px;"
-                            >修改指派</van-button
-                          >
-                          <van-button @click="_orders(item3)" size="mini">接单</van-button>
-                        </div>
-                      </div>
-                      <div v-if="item3.service_status === '3'">
-                        <div v-if="item3.supply.length > 0">
-                          <van-button @click="_rePickStaff(item3)" size="mini">修改指派</van-button>
-                          <van-button @click="_finish(item3)" size="mini">服务完成</van-button>
-                        </div>
-                        <div v-else>
-                          <van-button @click="_getStaffList(item3)" size="mini">指派服务</van-button>
-                        </div>
-                      </div>
-                      <div v-if="item3.service_status === '4'">
-                        <van-button @click="_rework(item3)" size="mini">返工</van-button>
-                        <van-button @click="_acceptance(item3)" size="mini">验收合格</van-button>
-                      </div>
-                      <div v-if="item3.service_status === '5'">待重新服务</div>
-                    </div>
-                  </van-col>
-                </van-row>
-              </div>
+          <div v-else>{{ item.s_name || '未知标识' }}</div>
+        </template>
+        <div>
+          <div class="tool-bar">
+            操作：
+            <div>
+              <van-button @click="_cancelOrder(item.order_id)" size="small" style="background: #ccc;">
+                取消此订单
+              </van-button>
+              <van-button @click="_getMarkList(item)" size="small" type="primary">修改标识</van-button>
+              <van-button @click="_confirm(item.order_id)" size="small" type="warning">选中</van-button>
             </div>
           </div>
-        </van-panel>
-        <div class="white-space"></div>
-      </div>
-    </van-radio-group>
-    <div class="tool-bar">
-      <van-button @click="_cancelOrder" size="small" style="background: #ccc;">取消</van-button>
-      <van-button @click="_confirm" size="small" type="primary">确定</van-button>
-    </div>
+          <van-cell-group :key="index2" v-for="(item2, index2) in item.list">
+            <van-cell :label="`x${item2.goods_num} ¥${item2.unit_price}`" :title="item2.name">
+              <div v-if="item2.type === '1'">
+                <div v-if="item2.service_status === '1'">
+                  已完成
+                  <van-button @click="viewStaff(item2)" size="mini" style="margin-left: 6px;">查看</van-button>
+                </div>
+                <div v-if="item2.service_status === '2'">
+                  <div v-if="item2.sent == '0'">
+                    <van-button @click="_getStaffList(item2)" size="mini">指派服务</van-button>
+                  </div>
+                  <div v-else>
+                    <van-button @click="_rePickStaff(item2)" size="mini" style="margin-right: 4px;">
+                      修改指派
+                    </van-button>
+                    <van-button @click="_orders(item2)" size="mini">接单</van-button>
+                  </div>
+                </div>
+                <div v-if="item2.service_status === '3'">
+                  <div v-if="item2.supply.length > 0">
+                    <van-button @click="_rePickStaff(item2)" size="mini">修改指派</van-button>
+                    <van-button @click="_finish(item2)" size="mini">服务完成</van-button>
+                  </div>
+                  <div v-else>
+                    <van-button @click="_getStaffList(item2)" size="mini">指派服务</van-button>
+                  </div>
+                </div>
+                <div v-if="item2.service_status === '4'">
+                  <van-button @click="_rework(item2)" size="mini">返工</van-button>
+                  <van-button @click="_acceptance(item2)" size="mini">验收合格</van-button>
+                </div>
+                <div v-if="item2.service_status === '5'">待重新服务</div>
+              </div>
+              <div v-if="item2.type === '4'">套餐</div>
+            </van-cell>
+            <!-- 套餐显示包含内容 -->
+            <div class="package-detail" v-if="item2.type === '4'">
+              <van-row :key="index3" align="center" class="detail" type="flex" v-for="(item3, index3) in item2.detail">
+                <van-col class="van-ellipsis" span="6">{{ item3.name }}</van-col>
+                <van-col class="price van-ellipsis" offset="1" span="5">
+                  <div>x {{ item3.goods_num }}</div>
+                </van-col>
+                <van-col span="12" style="display: flex;justify-content: flex-end;">
+                  <div v-if="item3.type === '1'">
+                    <div v-if="item3.service_status === '1'">
+                      已完成
+                      <van-button @click="viewStaff(item3)" size="mini" style="margin-left: 6px;">查看</van-button>
+                    </div>
+                    <div v-if="item3.service_status === '2'">
+                      <div v-if="item3.sent == '0'">
+                        <van-button @click="_getStaffList(item3)" size="mini">指派服务</van-button>
+                      </div>
+                      <div v-else>
+                        <van-button @click="_rePickStaff(item3)" size="mini" style="margin-right: 4px;">
+                          修改指派
+                        </van-button>
+                        <van-button @click="_orders(item3)" size="mini">接单</van-button>
+                      </div>
+                    </div>
+                    <div v-if="item3.service_status === '3'">
+                      <div v-if="item3.supply.length > 0">
+                        <van-button @click="_rePickStaff(item3)" size="mini">修改指派</van-button>
+                        <van-button @click="_finish(item3)" size="mini">服务完成</van-button>
+                      </div>
+                      <div v-else>
+                        <van-button @click="_getStaffList(item3)" size="mini">指派服务</van-button>
+                      </div>
+                    </div>
+                    <div v-if="item3.service_status === '4'">
+                      <van-button @click="_rework(item3)" size="mini">返工</van-button>
+                      <van-button @click="_acceptance(item3)" size="mini">验收合格</van-button>
+                    </div>
+                    <div v-if="item3.service_status === '5'">待重新服务</div>
+                  </div>
+                </van-col>
+              </van-row>
+            </div>
+          </van-cell-group>
+        </div>
+      </van-collapse-item>
+    </van-collapse>
+    <!-- <div class="tool-bar"></div> -->
     <van-popup position="bottom" safe-area-inset-bottom v-model="showMarkPicker">
       <van-picker :columns="markColumns" @confirm="_pickMark" show-toolbar title="选择标识位" value-key="s_name" />
     </van-popup>
@@ -164,9 +154,9 @@
           <van-button @click="_undoStaff(item)" size="small" style="float: right;" type="danger">撤下</van-button>
         </van-col>
       </van-row>
-      <van-button @click="_openSingleStaffPicker(curOrder)" class="add" icon="plus" size="small" type="primary"
-        >添加服务人员</van-button
-      >
+      <van-button @click="_openSingleStaffPicker(curOrder)" class="add" icon="plus" size="small" type="primary">
+        添加服务人员
+      </van-button>
     </van-popup>
 
     <!-- 取消原因 -->
@@ -202,6 +192,7 @@ export default {
       defaultStaffIndex: 0,
       staffResult: [],
       reason: '',
+      active: [],
     }
   },
 
@@ -251,10 +242,15 @@ export default {
           if (item.status === 1) {
             status = '使用中'
           }
+          let disabled = false
+          if (data.s_id == item.id) {
+            disabled = true
+          }
           return {
             ...item,
             s_name: `${item.s_name}（${tag} - ${status}）`,
             name: item.s_name,
+            disabled,
           }
         })
         this.showMarkPicker = true
@@ -333,6 +329,14 @@ export default {
         })
       })
     },
+    viewStaff(item) {
+      console.log(item)
+      let s = item.supply.map(i => {
+        return `${i.name} - ¥${i.service_fee}`
+      })
+      console.log(s)
+      this.$dialog({ message: s.join('\n') })
+    },
     // 指派服务人员
     _pickStaff() {
       if (this.staffResult.length == 0) {
@@ -347,46 +351,96 @@ export default {
           order_id: this.curOrder.order_id,
           store_order_id: this.curOrder.id,
           worker_id: this.staffResult,
-        }).then(() => {
-          this.$toast.success({
-            message: '指派成功',
-            duration: 800,
-            onClose: () => {
-              this.getEntryOrderList().then(res => {
-                this.orderList = res
-                this.showStaffPicker = false
-                this.staffResult = []
-              })
-            },
-          })
+        }).then(res => {
+          if (res.msg) {
+            this.$toast.success({
+              message: '指派成功\n（通知失败）',
+              duration: 1500,
+              onClose: () => {
+                this.getEntryOrderList().then(res => {
+                  this.orderList = res
+                  this.showStaffPicker = false
+                  this.staffResult = []
+                })
+              },
+            })
+          } else {
+            this.$toast.success({
+              message: '指派成功',
+              duration: 800,
+              onClose: () => {
+                this.getEntryOrderList().then(res => {
+                  this.orderList = res
+                  this.showStaffPicker = false
+                  this.staffResult = []
+                })
+              },
+            })
+          }
         })
       }
     },
     _openSingleStaffPicker(data) {
-      this.getFreeStaffList().then(res => {
-        if (data.remark_service_personnel !== '0') {
-          const index = res.findIndex(item => {
-            if (item.id == data.remark_service_personnel) {
-              return item
+      var supArr = data.supply.map(item => item.id)
+      this.getFreeStaffList({
+        id: data.goods_appoint_id,
+      }).then(res => {
+        if (res.length) {
+          res = res.map(item => {
+            let disabled = false
+            if (supArr.indexOf(item.id) > -1) {
+              disabled = true
+            }
+            return {
+              ...item,
+              name: item.name + ` - ${item.technician_grade_name || '暂无等级'} （¥ ${item.service_fee}）`,
+              disabled,
             }
           })
-          if (index > -1) {
-            this.defaultStaffIndex = index
-            res[index].name = res[index].name + ' （用户指定）'
+          if (data.remark_service_personnel !== '0') {
+            const index = res.findIndex(item => {
+              if (item.id == data.remark_service_personnel) {
+                return item
+              }
+            })
+            if (index > -1) {
+              this.defaultStaffIndex = index
+              res[index].name = res[index].name + ' （用户指定）'
+            }
           }
+          this.staffColumns = res
+          this.showStaffSinglePicker = true
+        } else {
+          this.$dialog.alert({
+            title: '提示',
+            message: '没有可指派的服务人员',
+          })
         }
-        let staffIDS = data.supply.map(item => {
-          return item.id
-        })
-        let col = []
-        res.forEach(item => {
-          if (staffIDS.indexOf(item.id) === -1) {
-            col.push(item)
-          }
-        })
 
-        this.staffColumns = col
-        this.showStaffSinglePicker = true
+        // if (data.remark_service_personnel !== '0') {
+        //           const index = res.findIndex(item => {
+        //             if (item.id == data.remark_service_personnel) {
+        //               return item
+        //             }
+        //           })
+        //           if (index > -1) {
+        //             this.defaultStaffIndex = index
+        //             res[index].name = res[index].name + ' （用户指定）'
+        //           }
+        //         }
+        //         let staffIDS = data.supply.map(item => {
+        //           return item.id
+        //         })
+        //         let col = []
+        //         res.forEach(item => {
+        //           if (staffIDS.indexOf(item.id) === -1) {
+        //             col.push(item)
+        //           }
+        //         })
+
+        //         this.staffColumns = col
+        //         this.showStaffSinglePicker = true
+        //       })
       })
     },
     _pickSingleStaff(data) {
@@ -429,17 +483,10 @@ export default {
     toggle(index, flag) {
       !flag && this.$refs.checkboxes[index].toggle()
     },
-    _confirm() {
-      if (this.radio) {
-        this.pullOrder({ order_id: this.radio }).then(() => {
-          this.$goBack()
-        })
-      } else {
-        this.$toast({
-          message: '请选择要操作的订单',
-          duration: 800,
-        })
-      }
+    _confirm(id) {
+      this.pullOrder({ order_id: id }).then(() => {
+        this.$goBack()
+      })
     },
     // 代替接单
     _orders(data) {
@@ -509,37 +556,26 @@ export default {
         })
       })
     },
-    _cancelOrder() {
-      if (this.radio) {
-        this.$dialog
-          .confirm({
-            title: '取消订单',
-            message: '确认取消当前订单？\n（服务将终止且订单无法恢复）',
-          })
-          .then(() => {
-            // on confirm
-            this.showReason = true
-          })
-          .catch(() => {
-            // on cancel
-          })
-      } else {
-        this.$toast({
-          message: '请选中要取消的订单',
-          duration: 800,
+    _cancelOrder(id) {
+      this.radio = id
+      this.$dialog
+        .confirm({
+          title: '取消订单',
+          message: '确认取消当前订单？\n（服务将终止且订单无法恢复）',
         })
-      }
+        .then(() => {
+          // on confirm
+          this.showReason = true
+        })
+        .catch(() => {
+          // on cancel
+        })
     },
     // 确认取消备注信息
     _confirmReason() {
       if (this.reason) {
-        let order = this.orderList.find(item => {
-          if (item.order_id === this.radio) {
-            return item
-          }
-        })
         this.cancelOrder({
-          order_id: order.order_id,
+          order_id: this.radio,
           reason: this.reason,
         }).then(() => {
           this.$toast.success({
@@ -597,7 +633,6 @@ export default {
   }
 }
 .van-panel__content {
-  padding: 6px 16px;
   font-size: 12px;
   color: #444;
 }
@@ -615,24 +650,29 @@ export default {
   padding-top: 8px;
 }
 
-.has-border-bottom {
-  border: 1px solid #ccc;
-  border-top: none;
-  margin-bottom: 8px;
+.package-detail {
+  padding: 12px;
 }
 
 .tool-bar {
-  position: fixed;
-  bottom: 0;
-  width: 100vw;
-  height: 50px;
+  // position: fixed;
+  // bottom: 0;
+  // width: 100vw;
+  // height: 50px;
+  // display: flex;
+  // justify-content: center;
+  // align-items: center;
+  // background: #fff;
+  // .van-button {
+  //   margin-right: 10px;
+  //   width: 42vw;
+  // }
+  padding: 4px 16px;
   display: flex;
-  justify-content: center;
   align-items: center;
-  background: #fff;
+  justify-content: space-between;
   .van-button {
-    margin-right: 10px;
-    width: 42vw;
+    margin-right: 4px;
   }
 }
 
@@ -662,5 +702,19 @@ export default {
     margin-top: 8px;
     float: right;
   }
+}
+
+.van-cell {
+  font-size: 12px;
+  color: #666;
+}
+
+.tel {
+  color: #323233;
+  margin-left: 12px;
+}
+
+/deep/.van-collapse-item__content {
+  padding: 0;
 }
 </style>

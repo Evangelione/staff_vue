@@ -1,10 +1,11 @@
 <template>
-  <router-view></router-view>
+  <div>index</div>
 </template>
 
 <script>
 export default {
-  name: 'MessageIndex',
+  name: 'index',
+
   mixins: [],
 
   components: {},

@@ -39,9 +39,16 @@ export default {
       ticket: localStorage.getItem('ticket'),
     })
   },
-  // 获取标识信息
-  getStationInfo: payload => {
-    return axios.post('/wap.php?g=Wap&c=ScanOrder&a=getStationInfo', {
+  // 指定店员
+  remStaff: payload => {
+    return axios.post('/wap.php?g=Wap&c=ScanOrder&a=remStaff', {
+      ...payload,
+      ticket: localStorage.getItem('ticket'),
+    })
+  },
+  // 修改商品数量
+  modifyGood: payload => {
+    return axios.post('/wap.php?g=Wap&c=ScanOrder&a=changeOrder', {
       ...payload,
       ticket: localStorage.getItem('ticket'),
     })

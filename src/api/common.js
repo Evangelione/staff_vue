@@ -60,5 +60,11 @@ export default {
   // 连接
   // connWs: (sid, uid) => axios.get(`http://127.0.0.1:8906/ws/conn/${sid}/${uid}`),
   // 通知ws
-  notificationWs: (sid, uid) => axios.get(`http://127.0.0.1:8906/ws/update/${sid}/${uid}`),
+  notificationWs: (sid, uid) => {
+    let url = 'https://go.9youke.com/robot'
+    if (process.env.VUE_APP_ENV == 'prod') {
+      url = 'https://go.91gzt.com/robot'
+    }
+    return axios.get(`${url}/ws/update/${sid}/${uid}`)
+  },
 }

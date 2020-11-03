@@ -124,7 +124,10 @@
           >
             取消任务
           </van-button>
-          <van-button v-if="status == 2 || status == 3" size="small" type="primary" @click="completeTask(item.id)">
+          <van-button v-if="status == 2" size="small" type="primary" @click="startTask(item.id)">
+            任务开始
+          </van-button>
+          <van-button v-if="status == 3" size="small" type="primary" @click="completeTask(item.id)">
             任务完成
           </van-button>
           <van-button size="small" v-if="status == 1 || status == 2 || status == 3" @click="goEdit(item.id)">
@@ -138,7 +141,7 @@
 
 <script>
 // eslint-disable-next-line no-unused-vars
-import { taskList, modifyTask, robotList, staffList, cancelTask, completeTask, cruisePointList } from '@/api/staff/task'
+import { taskList, modifyTask, robotList, staffList, cancelTask, completeTask, startTask } from '@/api/staff/task'
 export default {
   name: 'TaskList',
   mixins: [],
@@ -167,7 +170,7 @@ export default {
       roleOption: [],
       role_id: '',
       startTime: new Date(this.$moment().subtract(30, 'days')),
-      endTime: new Date(),
+      endTime: new Date(this.$moment().add(1, 'minute')),
       showStartTimePicker: false,
       showEndTimePicker: false,
       showRoleTypePicker: false,
@@ -372,6 +375,12 @@ export default {
     completeTask(id) {
       completeTask({ id }).then(() => {
         this.$toast.success('任务完成')
+        this._onRefresh()
+      })
+    },
+    startTask(id) {
+      startTask({ task_id: id }).then(() => {
+        this.$toast.success('任务已开始')
         this._onRefresh()
       })
     },

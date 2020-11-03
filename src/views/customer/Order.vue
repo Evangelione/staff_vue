@@ -327,7 +327,11 @@ export default {
       if (res.info.s_tag !== '2') {
         return
       }
-      var ws = new WebSocket(`ws://192.168.110.174:8906/ws/conn/${res.info.s_id}/${res.info.uid}`)
+      let url = 'wss://go.9youke.com/robot'
+      if (process.env.VUE_APP_ENV == 'prod') {
+        url = 'wss://go.91gzt.com/robot'
+      }
+      var ws = new WebSocket(`${url}/ws/conn/${res.info.s_id}/${res.info.uid}`)
       //连接打开时触发
       ws.onopen = function() {
         console.log('Connection open ...')

@@ -21,7 +21,7 @@ export const robotList = payload => {
 // 获取店铺下的巡航点
 export const pointList = payload => {
   console.log(payload)
-  return axios.post('/appapi.php?c=Merchantimax&a=point', withCommonData(payload))
+  return axios.post('/appapi.php?c=StorestaffTask&a=point', withCommonData(payload))
 }
 
 // 获取巡航路线

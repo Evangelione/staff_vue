@@ -36,6 +36,12 @@ export const completeTask = payload => {
   return axios.post('/appapi.php?c=StorestaffTask&a=overTask', withCommonData(payload))
 }
 
+// 手动完成任务
+export const startTask = payload => {
+  console.log(payload)
+  return axios.post('/appapi.php?c=StorestaffTask&a=startTask', withCommonData(payload))
+}
+
 // 获取巡航点
 export const cruisePointList = payload => {
   console.log(payload)

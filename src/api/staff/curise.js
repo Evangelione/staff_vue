@@ -42,6 +42,12 @@ export const curiseRouteDetail = payload => {
   return axios.post('/appapi.php?c=StorestaffTask&a=route_detail', withCommonData(payload))
 }
 
+// 删除循环路线
+export const curiseRouteDelete = payload => {
+  console.log(payload)
+  return axios.post('/appapi.php?c=StorestaffTask&a=del_route', withCommonData(payload))
+}
+
 // 机器人绑定巡航路线
 export const bindRoute = payload => {
   console.log(payload)

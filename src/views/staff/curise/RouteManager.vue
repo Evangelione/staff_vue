@@ -15,12 +15,12 @@
           <template #title>
             <span v-for="(item, index) in item.site" :key="index">
               <span v-if="index != 0">-></span>
-              {{ item.site_name }}
+              {{ item.mark_name }}
             </span>
           </template>
         </van-cell>
         <template #right>
-          <van-button square type="danger" text="删除" />
+          <van-button square type="danger" text="删除" @click="deleteRoute(item)" />
         </template>
       </van-swipe-cell>
     </van-cell-group>
@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { curiseRouteList } from '@/api/staff/curise'
+import { curiseRouteList, curiseRouteDelete } from '@/api/staff/curise'
 
 export default {
   name: 'RouteManager',
@@ -68,6 +68,18 @@ export default {
     goRouteCRU(id) {
       this.$router.push({
         path: `/staff/curise/routeCRU/${id}`,
+      })
+    },
+    deleteRoute(item) {
+      curiseRouteDelete({
+        id: item.id,
+      }).then(res => {
+        this.$toast.success('删除成功')
+        console.log(res)
+        curiseRouteList().then(res => {
+          this.routeList = res
+          console.log(res)
+        })
       })
     },
   },

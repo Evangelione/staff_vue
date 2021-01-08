@@ -331,7 +331,7 @@ export default {
       if (process.env.VUE_APP_ENV == 'prod') {
         url = 'wss://go.91gzt.com/robot'
       }
-      var ws = new WebSocket(`${url}/ws/conn/${res.info.s_id}/${res.info.uid}`)
+      var ws = new WebSocket(`${url}/v2/ws/conn/${res.info.s_id}/${res.info.uid}`)
       //连接打开时触发
       ws.onopen = function() {
         console.log('Connection open ...')

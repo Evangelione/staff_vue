@@ -100,10 +100,8 @@
           showPicker = true
         "
       />
-      <div style="margin: 16px;">
-        <van-button type="primary" block native-type="submit" :loading="loading">
-          提交
-        </van-button>
+      <div style="margin: 16px">
+        <van-button type="primary" block native-type="submit" :loading="loading">提交</van-button>
       </div>
     </van-form>
     <van-popup v-model="showPicker" position="bottom">
@@ -119,7 +117,7 @@
 </template>
 
 <script>
-import { robotList, staffList, modifyTask, taskDetail, cruisePointList } from '@/api/staff/task'
+import { robotList, staffList, modifyTask, taskDetail, cruisePointListByRobot } from '@/api/staff/task'
 
 export default {
   name: 'TaskCRU',
@@ -207,10 +205,8 @@ export default {
       let label = ''
       this.pointList.find(item => {
         item.children.find(child => {
-          console.log(child.id)
-          console.log(this.form.site_id)
           if (child.id == this.form.site_id) {
-            label = child.site_name
+            label = item.map_name + ' - ' + child.mark_name
             return child
           }
         })
@@ -238,6 +234,16 @@ export default {
           type: res.type - 0,
           site_id: res.site_id,
         }
+        cruisePointListByRobot({ device_id: res.designate_id }).then(res => {
+          this.pointList = res.map(item => {
+            item.text = item.map_name
+            item.children = item.site.map(child => {
+              child.text = child.mark_name
+              return child
+            })
+            return item
+          })
+        })
       })
     robotList().then(res => {
       console.log(res)
@@ -254,17 +260,6 @@ export default {
         item.value = item.id
         return item
       })
-    })
-    cruisePointList().then(res => {
-      this.pointList = res.map(item => {
-        item.text = item.map_name
-        item.children = item.site.map(child => {
-          child.text = child.site_name
-          return child
-        })
-        return item
-      })
-      console.log(res)
     })
   },
 
@@ -289,6 +284,18 @@ export default {
           ]
         }
         this.form.designate_id = ''
+      }
+      if (this.currentPicker == 'designate_id') {
+        cruisePointListByRobot({ device_id: data.id }).then(res => {
+          this.pointList = res.map(item => {
+            item.text = item.map_name
+            item.children = item.site.map(child => {
+              child.text = child.mark_name
+              return child
+            })
+            return item
+          })
+        })
       }
       this.form[this.currentPicker] = data.value
       if (this.currentPicker == 'site_id') {

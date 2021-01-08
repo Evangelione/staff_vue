@@ -58,13 +58,13 @@ export default {
       ticket: localStorage.getItem('ticket'),
     }),
   // 连接
-  // connWs: (sid, uid) => axios.get(`http://127.0.0.1:8906/ws/conn/${sid}/${uid}`),
+  // connWs: (sid, uid) => axios.get(`http://127.0.0.1:8906/v2/ws/conn/${sid}/${uid}`),
   // 通知ws
   notificationWs: (sid, uid) => {
     let url = 'https://go.9youke.com/robot'
     if (process.env.VUE_APP_ENV == 'prod') {
       url = 'https://go.91gzt.com/robot'
     }
-    return axios.get(`${url}/ws/update/${sid}/${uid}`)
+    return axios.get(`${url}/v2/ws/update/${sid}/${uid}`)
   },
 }

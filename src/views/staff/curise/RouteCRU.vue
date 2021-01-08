@@ -26,8 +26,9 @@
                 shape="square"
                 v-for="(item, index) in item.site"
                 :key="index"
+                style="margin-bottom:4px;"
               >
-                {{ item.site_name }}
+                {{ item.mark_name }}
               </van-checkbox>
             </van-checkbox-group>
           </template>
@@ -78,7 +79,7 @@ export default {
             return site
           }
         })
-        return site.site_name
+        return site.mark_name
       })
       return arr
     },

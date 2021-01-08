@@ -48,6 +48,10 @@ export const cruisePointList = payload => {
   return axios.post('/appapi.php?c=StorestaffTask&a=point', withCommonData(payload))
 }
 
+export const cruisePointListByRobot = payload => {
+  return axios.post('/appapi.php?c=StorestaffTask&a=devicePoint', withCommonData(payload))
+}
+
 // 门店机器人列表
 export const robotList = payload => {
   console.log(payload)
